@@ -348,10 +348,13 @@
             position: fixed;
             inset: 0;
             background: #0a0a0f;
-            display: flex;
             align-items: center;
             justify-content: center;
             z-index: 200;
+        }
+        
+        .lock-screen:not(.hidden) {
+            display: flex;
         }
         
         .pin-input { display: flex; gap: 10px; justify-content: center; }
@@ -495,7 +498,7 @@
     </div>
     
     <!-- PIN Lock Screen -->
-    <div id="pin-lock-screen" class="lock-screen hidden">
+    <div id="pin-lock-screen" style="display: none;" class="lock-screen">
         <div class="text-center">
             <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-cyber-glow/20 flex items-center justify-center">
                 <svg class="w-10 h-10 text-cyber-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -512,7 +515,7 @@
                 <input type="password" maxlength="1" class="pin-digit" data-index="3" oninput="handlePinInput(this)" onkeydown="handlePinKeydown(event, this)" aria-label="PIN digit 4">
             </div>
             
-            <p id="pin-error" class="text-cyber-danger text-sm hidden">Incorrect PIN. Please try again.</p>
+            <p id="pin-error" class="text-cyber-danger text-sm" style="display: none;">Incorrect PIN. Please try again.</p>
         </div>
     </div>
     
@@ -2938,10 +2941,12 @@
         function verifyPin(enteredPin) {
             if (enteredPin === state.settings.pin) {
                 state.ui.isLocked = false;
-                document.getElementById('pin-lock-screen')?.classList.add('hidden');
+                const lockScreen = document.getElementById('pin-lock-screen');
+                if (lockScreen) lockScreen.style.display = 'none';
                 document.querySelectorAll('.pin-digit').forEach(i => i.value = '');
             } else {
-                document.getElementById('pin-error')?.classList.remove('hidden');
+                const pinError = document.getElementById('pin-error');
+                if (pinError) pinError.style.display = 'block';
                 document.querySelectorAll('.pin-digit').forEach(i => i.value = '');
                 document.querySelector('.pin-digit[data-index="0"]')?.focus();
             }
