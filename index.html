@@ -171,6 +171,127 @@
             filter: brightness(1.3);
             transform: scaleY(1.1);
         }
+        
+        /* Toast notification styles */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .toast {
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s;
+            max-width: 350px;
+        }
+        
+        .toast.success {
+            background: rgba(0, 255, 136, 0.15);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+        }
+        
+        .toast.error {
+            background: rgba(255, 51, 102, 0.15);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            color: #ff3366;
+        }
+        
+        .toast.warning {
+            background: rgba(255, 184, 0, 0.15);
+            border: 1px solid rgba(255, 184, 0, 0.3);
+            color: #ffb800;
+        }
+        
+        .toast.info {
+            background: rgba(0, 180, 255, 0.15);
+            border: 1px solid rgba(0, 180, 255, 0.3);
+            color: #00b4ff;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        /* Input validation styles */
+        .input-valid {
+            border-color: #00ff88 !important;
+        }
+        
+        .input-invalid {
+            border-color: #ff3366 !important;
+        }
+        
+        .validation-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        /* Privacy mode blur */
+        .privacy-blur {
+            filter: blur(8px);
+            user-select: none;
+        }
+        
+        /* Network indicator pulse */
+        .network-excellent { color: #00ff88; }
+        .network-good { color: #00b4ff; }
+        .network-fair { color: #ffb800; }
+        .network-poor { color: #ff3366; }
+        
+        /* Recent targets dropdown */
+        .recent-targets-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #12121a;
+            border: 1px solid #1f1f2e;
+            border-radius: 12px;
+            margin-top: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 20;
+        }
+        
+        .recent-target-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .recent-target-item:hover {
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        .recent-target-item:first-child {
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .recent-target-item:last-child {
+            border-radius: 0 0 12px 12px;
+        }
     </style>
     <script type="application/ld+json">
     {
@@ -198,6 +319,9 @@
     <div class="noise-overlay fixed inset-0 pointer-events-none z-50"></div>
     <div class="grid-bg fixed inset-0 pointer-events-none"></div>
     
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+    
     <!-- Header -->
     <header class="relative border-b border-cyber-border/50 backdrop-blur-xl bg-cyber-dark/80 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-6 py-4">
@@ -214,6 +338,22 @@
                 </div>
                 
                 <div class="flex items-center gap-4">
+                    <!-- Network Quality Indicator -->
+                    <div id="network-indicator" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyber-card border border-cyber-border" role="status" aria-label="Network quality">
+                        <svg class="w-4 h-4 network-excellent" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
+                        </svg>
+                        <span class="text-xs font-mono text-gray-400" id="network-quality">Excellent</span>
+                    </div>
+                    
+                    <!-- Privacy Mode Toggle -->
+                    <button onclick="togglePrivacyMode()" id="privacy-toggle" class="p-2 rounded-lg bg-cyber-card border border-cyber-border hover:border-cyber-purple/50 transition-colors" aria-label="Toggle privacy mode" title="Privacy Mode (Ctrl+P)">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="privacy-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                    
                     <div id="connection-status" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyber-card border border-cyber-border" role="status" aria-live="polite">
                         <span class="w-2 h-2 rounded-full bg-gray-500 animate-pulse" id="status-dot" aria-hidden="true"></span>
                         <span class="text-sm font-mono text-gray-400" id="status-text">Disconnected</span>
@@ -310,12 +450,36 @@
                     
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm text-gray-400 mb-2 font-mono">Phone Number</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="country-code" value="+1" class="w-20 px-3 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono focus:border-cyber-glow focus:outline-none focus:ring-1 focus:ring-cyber-glow/50">
-                                <input type="tel" id="phone-number" placeholder="7012345678" class="flex-1 px-4 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono placeholder-gray-600 focus:border-cyber-glow focus:outline-none focus:ring-1 focus:ring-cyber-glow/50">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-sm text-gray-400 font-mono">Phone Number</label>
+                                <button onclick="toggleRecentTargets()" id="recent-targets-btn" class="text-xs text-cyber-info hover:text-cyber-glow transition-colors flex items-center gap-1" title="Recent targets">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Recent
+                                </button>
                             </div>
-                            <p class="text-xs text-gray-500 mt-2 font-mono">Format: Country code + number (e.g., +1 7012345678)</p>
+                            <div class="relative">
+                                <div class="flex gap-2">
+                                    <div class="relative w-24">
+                                        <input type="text" id="country-code" value="+1" oninput="validateCountryCode()" class="w-full px-3 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono focus:border-cyber-glow focus:outline-none focus:ring-1 focus:ring-cyber-glow/50" aria-label="Country code">
+                                    </div>
+                                    <div class="relative flex-1">
+                                        <input type="tel" id="phone-number" placeholder="7012345678" oninput="validatePhoneNumber()" onfocus="showRecentTargets()" class="w-full px-4 py-3 pr-10 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono placeholder-gray-600 focus:border-cyber-glow focus:outline-none focus:ring-1 focus:ring-cyber-glow/50 privacy-target" aria-label="Phone number">
+                                        <span id="phone-validation-icon" class="validation-icon hidden"></span>
+                                    </div>
+                                </div>
+                                <!-- Recent Targets Dropdown -->
+                                <div id="recent-targets-dropdown" class="recent-targets-dropdown hidden">
+                                    <div id="recent-targets-list"></div>
+                                    <div class="p-2 border-t border-cyber-border">
+                                        <button onclick="clearRecentTargets()" class="w-full text-xs text-gray-500 hover:text-cyber-danger transition-colors py-1">Clear History</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-2">
+                                <p id="phone-validation-msg" class="text-xs text-gray-500 font-mono">Format: Country code + number (e.g., +1 7012345678)</p>
+                            </div>
                         </div>
                         
                         <button onclick="startTracking()" id="start-tracking-btn" class="w-full py-3 bg-gradient-to-r from-cyber-glow/20 to-cyber-purple/20 text-cyber-glow border border-cyber-glow/30 rounded-xl font-medium hover:from-cyber-glow/30 hover:to-cyber-purple/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -323,6 +487,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             Start Tracking
+                        </button>
+                        
+                        <!-- Print Report Button -->
+                        <button onclick="printReport()" id="print-report-btn" class="w-full py-2.5 bg-cyber-darker border border-cyber-border rounded-xl font-medium text-gray-400 hover:text-white hover:border-cyber-info/50 transition-all duration-300 flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                            </svg>
+                            Print Report
                         </button>
                     </div>
                 </div>
@@ -636,6 +808,16 @@
                 </div>
                 
                 <div class="flex items-center justify-between p-3 rounded-xl bg-cyber-darker border border-cyber-border">
+                    <div>
+                        <span class="text-sm">Sound Alerts</span>
+                        <p class="text-xs text-gray-500">Play sound on status changes</p>
+                    </div>
+                    <button onclick="toggleSoundAlerts()" id="sound-alerts-toggle" class="relative w-12 h-6 rounded-full bg-gray-700 transition-colors" role="switch" aria-checked="false">
+                        <div class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform"></div>
+                    </button>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 rounded-xl bg-cyber-darker border border-cyber-border">
                     <span class="text-sm">Dark Mode</span>
                     <button class="relative w-12 h-6 rounded-full bg-cyber-glow transition-colors" role="switch" aria-checked="true" disabled>
                         <div class="absolute top-1 right-1 w-4 h-4 rounded-full bg-white"></div>
@@ -689,6 +871,14 @@
                 <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
                     <span class="text-sm text-gray-300">Clear History</span>
                     <kbd class="px-2 py-1 text-xs bg-cyber-border rounded font-mono">Ctrl + L</kbd>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                    <span class="text-sm text-gray-300">Toggle Privacy Mode</span>
+                    <kbd class="px-2 py-1 text-xs bg-cyber-border rounded font-mono">Ctrl + P</kbd>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                    <span class="text-sm text-gray-300">Print Report</span>
+                    <kbd class="px-2 py-1 text-xs bg-cyber-border rounded font-mono">Ctrl + Shift + P</kbd>
                 </div>
             </div>
             
@@ -753,6 +943,9 @@
             rttHistory: [],
             activityData: Array(48).fill(null),
             detectedDevices: [],
+            recentTargets: [],
+            privacyMode: false,
+            lastStatus: null,
             stats: {
                 online: 0,
                 standby: 0,
@@ -764,12 +957,14 @@
                 timeout: 5000,
                 backendUrl: 'http://localhost:3001',
                 notifications: false,
+                soundAlerts: false,
                 screenThreshold: 1000 // RTT threshold for screen on/off detection
             }
         };
 
         let rttChart = null;
         let trackingInterval = null;
+        let audioContext = null;
 
         // ===== HELPER FUNCTIONS =====
         /**
@@ -784,6 +979,411 @@
                 ? Math.round((sortedArr[mid - 1] + sortedArr[mid]) / 2)
                 : sortedArr[mid];
         }
+        
+        // ===== TOAST NOTIFICATIONS =====
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+                error: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+                warning: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>',
+                info: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+            };
+            
+            toast.innerHTML = `${icons[type] || icons.info}<span>${message}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        // ===== INPUT VALIDATION =====
+        function validatePhoneNumber() {
+            const input = document.getElementById('phone-number');
+            const icon = document.getElementById('phone-validation-icon');
+            const msg = document.getElementById('phone-validation-msg');
+            const value = input.value.replace(/\D/g, '');
+            
+            // Phone number should be between 7 and 15 digits
+            const isValid = value.length >= 7 && value.length <= 15;
+            
+            if (value.length === 0) {
+                input.classList.remove('input-valid', 'input-invalid');
+                icon.classList.add('hidden');
+                msg.textContent = 'Format: Country code + number (e.g., +1 7012345678)';
+                msg.className = 'text-xs text-gray-500 font-mono';
+            } else if (isValid) {
+                input.classList.remove('input-invalid');
+                input.classList.add('input-valid');
+                icon.innerHTML = '<svg class="w-5 h-5 text-cyber-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                icon.classList.remove('hidden');
+                msg.textContent = 'Valid phone number format';
+                msg.className = 'text-xs text-cyber-glow font-mono';
+            } else {
+                input.classList.remove('input-valid');
+                input.classList.add('input-invalid');
+                icon.innerHTML = '<svg class="w-5 h-5 text-cyber-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+                icon.classList.remove('hidden');
+                msg.textContent = value.length < 7 ? 'Phone number too short (min 7 digits)' : 'Phone number too long (max 15 digits)';
+                msg.className = 'text-xs text-cyber-danger font-mono';
+            }
+            
+            return isValid;
+        }
+        
+        function validateCountryCode() {
+            const input = document.getElementById('country-code');
+            let value = input.value;
+            
+            // Ensure it starts with +
+            if (!value.startsWith('+')) {
+                value = '+' + value.replace(/[^0-9]/g, '');
+            } else {
+                value = '+' + value.slice(1).replace(/[^0-9]/g, '');
+            }
+            
+            // Limit to 4 characters (+ and up to 3 digits)
+            if (value.length > 4) {
+                value = value.slice(0, 4);
+            }
+            
+            input.value = value;
+        }
+        
+        // ===== RECENT TARGETS =====
+        function loadRecentTargets() {
+            const saved = localStorage.getItem('falcon-tracker-recent-targets');
+            if (saved) {
+                state.recentTargets = JSON.parse(saved);
+            }
+        }
+        
+        function saveRecentTarget(countryCode, phoneNumber) {
+            const fullNumber = countryCode + phoneNumber;
+            
+            // Remove if already exists
+            state.recentTargets = state.recentTargets.filter(t => t.full !== fullNumber);
+            
+            // Add to beginning
+            state.recentTargets.unshift({
+                countryCode: countryCode,
+                phone: phoneNumber,
+                full: fullNumber,
+                platform: state.platform,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Keep only last 10
+            if (state.recentTargets.length > 10) {
+                state.recentTargets = state.recentTargets.slice(0, 10);
+            }
+            
+            localStorage.setItem('falcon-tracker-recent-targets', JSON.stringify(state.recentTargets));
+        }
+        
+        function showRecentTargets() {
+            if (state.recentTargets.length === 0) return;
+            
+            const dropdown = document.getElementById('recent-targets-dropdown');
+            const list = document.getElementById('recent-targets-list');
+            
+            // Clear existing content
+            list.innerHTML = '';
+            
+            // Create elements safely to prevent XSS
+            state.recentTargets.forEach(target => {
+                const item = document.createElement('div');
+                item.className = 'recent-target-item';
+                item.onclick = () => selectRecentTarget(target.countryCode, target.phone);
+                
+                const infoDiv = document.createElement('div');
+                const phoneSpan = document.createElement('span');
+                phoneSpan.className = 'font-mono text-sm';
+                phoneSpan.textContent = '+' + target.full;
+                
+                const platformSpan = document.createElement('span');
+                platformSpan.className = 'text-xs text-gray-500 ml-2';
+                platformSpan.textContent = target.platform;
+                
+                infoDiv.appendChild(phoneSpan);
+                infoDiv.appendChild(platformSpan);
+                
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'text-xs text-gray-500';
+                dateSpan.textContent = new Date(target.timestamp).toLocaleDateString();
+                
+                item.appendChild(infoDiv);
+                item.appendChild(dateSpan);
+                list.appendChild(item);
+            });
+            
+            dropdown.classList.remove('hidden');
+        }
+        
+        function hideRecentTargets() {
+            setTimeout(() => {
+                document.getElementById('recent-targets-dropdown').classList.add('hidden');
+            }, 200);
+        }
+        
+        function toggleRecentTargets() {
+            const dropdown = document.getElementById('recent-targets-dropdown');
+            if (dropdown.classList.contains('hidden')) {
+                showRecentTargets();
+            } else {
+                dropdown.classList.add('hidden');
+            }
+        }
+        
+        function selectRecentTarget(countryCode, phone) {
+            // countryCode is stored without the + prefix
+            document.getElementById('country-code').value = '+' + countryCode;
+            document.getElementById('phone-number').value = phone;
+            document.getElementById('recent-targets-dropdown').classList.add('hidden');
+            validatePhoneNumber();
+        }
+        
+        function clearRecentTargets() {
+            state.recentTargets = [];
+            localStorage.removeItem('falcon-tracker-recent-targets');
+            document.getElementById('recent-targets-dropdown').classList.add('hidden');
+            showToast('Recent targets cleared', 'info');
+        }
+        
+        // ===== PRIVACY MODE =====
+        function togglePrivacyMode() {
+            state.privacyMode = !state.privacyMode;
+            
+            const icon = document.getElementById('privacy-icon');
+            const toggle = document.getElementById('privacy-toggle');
+            const privacyTargets = document.querySelectorAll('.privacy-target, #phone-number, #status-jid');
+            
+            if (state.privacyMode) {
+                toggle.classList.add('border-cyber-purple');
+                icon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                `;
+                privacyTargets.forEach(el => el.classList.add('privacy-blur'));
+                showToast('Privacy mode enabled', 'info');
+            } else {
+                toggle.classList.remove('border-cyber-purple');
+                icon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                `;
+                privacyTargets.forEach(el => el.classList.remove('privacy-blur'));
+                showToast('Privacy mode disabled', 'info');
+            }
+        }
+        
+        // ===== SOUND ALERTS =====
+        function initAudioContext() {
+            if (!audioContext) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextClass) {
+                    console.warn('AudioContext not supported in this browser');
+                    return null;
+                }
+                try {
+                    audioContext = new AudioContextClass();
+                } catch (err) {
+                    console.warn('Failed to create AudioContext:', err.message);
+                    return null;
+                }
+            }
+            return audioContext;
+        }
+        
+        function playStatusSound(status) {
+            if (!state.settings.soundAlerts) return;
+            
+            try {
+                const ctx = initAudioContext();
+                if (!ctx) return; // AudioContext not available
+                
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                // Different frequencies for different statuses
+                const frequencies = {
+                    online: 880,   // High pitch - good
+                    standby: 440,  // Medium pitch - neutral  
+                    offline: 220   // Low pitch - warning
+                };
+                
+                oscillator.frequency.value = frequencies[status] || 440;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + 0.3);
+            } catch (err) {
+                // Audio playback failed - could be user gesture required or blocked
+                console.warn('Sound alert failed:', err.message);
+            }
+        }
+        
+        function toggleSoundAlerts() {
+            state.settings.soundAlerts = !state.settings.soundAlerts;
+            const toggle = document.getElementById('sound-alerts-toggle');
+            const dot = toggle.querySelector('div');
+            
+            if (state.settings.soundAlerts) {
+                toggle.className = 'relative w-12 h-6 rounded-full bg-cyber-glow transition-colors';
+                toggle.setAttribute('aria-checked', 'true');
+                dot.className = 'absolute top-1 right-1 w-4 h-4 rounded-full bg-white transition-transform';
+                playStatusSound('online'); // Test sound
+                showToast('Sound alerts enabled', 'success');
+            } else {
+                toggle.className = 'relative w-12 h-6 rounded-full bg-gray-700 transition-colors';
+                toggle.setAttribute('aria-checked', 'false');
+                dot.className = 'absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform';
+                showToast('Sound alerts disabled', 'info');
+            }
+        }
+        
+        // ===== NETWORK QUALITY INDICATOR =====
+        function updateNetworkQuality() {
+            // Simulate network quality based on RTT history
+            const indicator = document.getElementById('network-indicator');
+            const qualityText = document.getElementById('network-quality');
+            const icon = indicator.querySelector('svg');
+            
+            let quality = 'Excellent';
+            let colorClass = 'network-excellent';
+            
+            if (state.rttHistory.length > 0) {
+                const recentRtts = state.rttHistory.slice(-5).map(h => h.rtt);
+                const avgRtt = recentRtts.reduce((a, b) => a + b, 0) / recentRtts.length;
+                
+                if (avgRtt < 500) {
+                    quality = 'Excellent';
+                    colorClass = 'network-excellent';
+                } else if (avgRtt < 1000) {
+                    quality = 'Good';
+                    colorClass = 'network-good';
+                } else if (avgRtt < 2000) {
+                    quality = 'Fair';
+                    colorClass = 'network-fair';
+                } else {
+                    quality = 'Poor';
+                    colorClass = 'network-poor';
+                }
+            }
+            
+            icon.className = `w-4 h-4 ${colorClass}`;
+            qualityText.textContent = quality;
+        }
+        
+        // ===== PRINT REPORT =====
+        function printReport() {
+            if (state.rttHistory.length === 0) {
+                showToast('No data to print. Start tracking first.', 'warning');
+                return;
+            }
+            
+            const reportWindow = window.open('', '_blank');
+            const platformName = state.platform.charAt(0).toUpperCase() + state.platform.slice(1);
+            
+            const reportContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Falcon Tracker Report - ${new Date().toLocaleDateString()}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+                        h1 { color: #00ff88; border-bottom: 2px solid #00ff88; padding-bottom: 10px; }
+                        h2 { color: #666; margin-top: 30px; }
+                        .meta { color: #888; font-size: 14px; margin-bottom: 20px; }
+                        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 20px 0; }
+                        .stat-card { background: #f5f5f5; padding: 20px; border-radius: 8px; text-align: center; }
+                        .stat-value { font-size: 28px; font-weight: bold; }
+                        .stat-label { font-size: 12px; color: #666; text-transform: uppercase; }
+                        .online { color: #00ff88; }
+                        .standby { color: #ffb800; }
+                        .offline { color: #ff3366; }
+                        .info { color: #00b4ff; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+                        th { background: #f0f0f0; }
+                        .footer { margin-top: 40px; text-align: center; color: #999; font-size: 12px; }
+                        @media print { body { padding: 20px; } }
+                    </style>
+                </head>
+                <body>
+                    <h1>🦅 Falcon Tracker Report</h1>
+                    <div class="meta">
+                        <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+                        <p><strong>Platform:</strong> ${platformName}</p>
+                        <p><strong>Target:</strong> +${state.targetNumber || 'N/A'}</p>
+                        <p><strong>Session Duration:</strong> ${state.rttHistory.length} probes</p>
+                    </div>
+                    
+                    <h2>Session Statistics</h2>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value online">${state.stats.online}</div>
+                            <div class="stat-label">Online</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value standby">${state.stats.standby}</div>
+                            <div class="stat-label">Standby</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value offline">${state.stats.offline}</div>
+                            <div class="stat-label">Offline</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value info">${state.stats.total}</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                    </div>
+                    
+                    <h2>RTT Data (Last 50 entries)</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>RTT (ms)</th>
+                                <th>Status</th>
+                                <th>Screen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${state.rttHistory.slice(-50).reverse().map(h => `
+                                <tr>
+                                    <td>${new Date(h.timestamp).toLocaleTimeString()}</td>
+                                    <td>${h.rtt}</td>
+                                    <td class="${h.status}">${h.status.charAt(0).toUpperCase() + h.status.slice(1)}</td>
+                                    <td>${h.screenState === 'on' ? 'ON' : h.screenState === 'off' ? 'OFF' : 'Unknown'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <div class="footer">
+                        <p>Generated by Falcon Tracker | Based on "Careless Whisper" Research</p>
+                        <p>⚠️ For educational and research purposes only</p>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            reportWindow.document.write(reportContent);
+            reportWindow.document.close();
+            reportWindow.print();
+            
+            showToast('Report generated successfully', 'success');
+        }
 
         // ===== INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', () => {
@@ -791,6 +1391,14 @@
             initActivityTimeline();
             initProbeMethodListeners();
             loadSettings();
+            loadRecentTargets();
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#recent-targets-dropdown') && !e.target.closest('#phone-number') && !e.target.closest('#recent-targets-btn')) {
+                    document.getElementById('recent-targets-dropdown').classList.add('hidden');
+                }
+            });
             
             // Simulate connection for demo
             setTimeout(() => simulateConnection(), 1000);
@@ -1107,18 +1715,24 @@
             const countryCode = document.getElementById('country-code').value.replace('+', '');
             const phoneNumber = document.getElementById('phone-number').value.replace(/\D/g, '');
             
-            if (!phoneNumber) {
+            // Validate phone number
+            if (!phoneNumber || !validatePhoneNumber()) {
+                showToast('Please enter a valid phone number', 'error');
                 addLog('error', 'Please enter a valid phone number');
                 return;
             }
             
             if (!state.isConnected) {
+                showToast('Please connect first by scanning the QR code', 'warning');
                 addLog('error', 'Please connect first by scanning the QR code');
                 return;
             }
             
             state.targetNumber = countryCode + phoneNumber;
             state.isTracking = true;
+            
+            // Save to recent targets
+            saveRecentTarget(countryCode, phoneNumber);
             
             const btn = document.getElementById('start-tracking-btn');
             btn.innerHTML = `
@@ -1128,6 +1742,8 @@
                 </svg>
                 Tracking...
             `;
+            btn.classList.add('bg-cyber-danger/20', 'border-cyber-danger/30');
+            btn.classList.remove('from-cyber-glow/20', 'to-cyber-purple/20', 'border-cyber-glow/30');
             btn.onclick = stopTracking;
             
             // Set JID based on platform
@@ -1136,6 +1752,7 @@
                 : '@threema.ch';
             document.getElementById('status-jid').textContent = `${state.targetNumber}${jidSuffix}`;
             
+            showToast(`Tracking started for +${state.targetNumber}`, 'success');
             addLog('info', `Started tracking: +${state.targetNumber} on ${state.platform.charAt(0).toUpperCase() + state.platform.slice(1)}`);
             addLog('info', `Probe method: ${state.probeMethod === 'delete' ? 'Silent Delete' : state.probeMethod === 'reaction' ? 'Self-Reaction' : 'Message Edit'}`);
             
@@ -1159,8 +1776,11 @@
                 </svg>
                 Start Tracking
             `;
+            btn.classList.remove('bg-cyber-danger/20', 'border-cyber-danger/30');
+            btn.classList.add('from-cyber-glow/20', 'to-cyber-purple/20', 'border-cyber-glow/30');
             btn.onclick = startTracking;
             
+            showToast('Tracking stopped', 'info');
             addLog('info', 'Tracking stopped');
         }
 
@@ -1242,6 +1862,13 @@
             updateActivityData(deviceStatus, rtt);
             updateOSFingerprint(rtt);
             updateDeviceSessions(deviceStatus);
+            updateNetworkQuality();
+            
+            // Play sound alert if status changed
+            if (state.lastStatus !== null && state.lastStatus !== deviceStatus) {
+                playStatusSound(deviceStatus);
+            }
+            state.lastStatus = deviceStatus;
             
             // Log event
             const statusEmoji = deviceStatus === 'online' ? '🟢' : deviceStatus === 'standby' ? '🟡' : '🔴';
@@ -1608,6 +2235,24 @@
                 document.getElementById('timeout-value').value = state.settings.timeout;
                 document.getElementById('backend-url').value = state.settings.backendUrl;
                 document.getElementById('screen-threshold').value = state.settings.screenThreshold;
+                
+                // Update notification toggle UI
+                if (state.settings.notifications) {
+                    const toggle = document.getElementById('notifications-toggle');
+                    const dot = toggle.querySelector('div');
+                    toggle.className = 'relative w-12 h-6 rounded-full bg-cyber-glow transition-colors';
+                    toggle.setAttribute('aria-checked', 'true');
+                    dot.className = 'absolute top-1 right-1 w-4 h-4 rounded-full bg-white transition-transform';
+                }
+                
+                // Update sound alerts toggle UI
+                if (state.settings.soundAlerts) {
+                    const toggle = document.getElementById('sound-alerts-toggle');
+                    const dot = toggle.querySelector('div');
+                    toggle.className = 'relative w-12 h-6 rounded-full bg-cyber-glow transition-colors';
+                    toggle.setAttribute('aria-checked', 'true');
+                    dot.className = 'absolute top-1 right-1 w-4 h-4 rounded-full bg-white transition-transform';
+                }
             }
         }
 
@@ -1619,6 +2264,7 @@
             
             localStorage.setItem('falcon-tracker-settings', JSON.stringify(state.settings));
             
+            showToast('Settings saved successfully', 'success');
             addLog('success', 'Settings saved');
             toggleSettings();
             
@@ -1697,6 +2343,18 @@
             if (e.ctrlKey && e.key === 'l') {
                 e.preventDefault();
                 clearHistory();
+            }
+            
+            // Toggle privacy mode with Ctrl+P (without shift)
+            if (e.ctrlKey && e.key === 'p' && !e.shiftKey) {
+                e.preventDefault();
+                togglePrivacyMode();
+            }
+            
+            // Print report with Ctrl+Shift+P
+            if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+                e.preventDefault();
+                printReport();
             }
         });
     </script>
