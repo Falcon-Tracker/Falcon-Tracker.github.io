@@ -529,15 +529,15 @@
                     <div class="flex items-center justify-center gap-6 mt-4">
                         <div class="flex items-center gap-2">
                             <div class="w-3 h-3 rounded bg-cyber-glow" aria-hidden="true"></div>
-                            <span class="text-xs text-gray-400">Screen On (RTT &lt;1s)</span>
+                            <span class="text-xs text-gray-400">Screen On (RTT &lt; threshold)</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-3 h-3 rounded bg-cyber-warn" aria-hidden="true"></div>
-                            <span class="text-xs text-gray-400">Standby (RTT 1-3s)</span>
+                            <span class="text-xs text-gray-400">Standby (threshold-3x)</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-3 h-3 rounded bg-cyber-danger" aria-hidden="true"></div>
-                            <span class="text-xs text-gray-400">Offline (RTT &gt;3s)</span>
+                            <span class="text-xs text-gray-400">Offline (RTT &gt; 3x threshold)</span>
                         </div>
                     </div>
                 </div>
@@ -863,7 +863,10 @@
                 const bar = document.createElement('div');
                 bar.className = 'activity-bar flex-1 rounded-t bg-gray-700/50 cursor-pointer';
                 bar.style.height = '10%';
-                bar.title = `${Math.floor(i / 2)}:${(i % 2) * 30 === 0 ? '00' : '30'} - No data`;
+                // Pad hour and minute with leading zeros for consistent display
+                const hour = Math.floor(i / 2).toString().padStart(2, '0');
+                const min = ((i % 2) * 30).toString().padStart(2, '0');
+                bar.title = `${hour}:${min} - No data`;
                 container.appendChild(bar);
             }
         }
@@ -886,7 +889,10 @@
                     
                     const hour = Math.floor(index / 2);
                     const min = (index % 2) * 30;
-                    bar.title = `${hour}:${min === 0 ? '00' : '30'} - ${activity.status.charAt(0).toUpperCase() + activity.status.slice(1)} (${activity.rtt}ms)`;
+                    // Pad hour and minute with leading zeros for consistent display
+                    const hourStr = hour.toString().padStart(2, '0');
+                    const minStr = min.toString().padStart(2, '0');
+                    bar.title = `${hourStr}:${minStr} - ${activity.status.charAt(0).toUpperCase() + activity.status.slice(1)} (${activity.rtt}ms)`;
                 }
             });
         }
@@ -1113,30 +1119,45 @@
         }
 
         function simulateTracking() {
-            // Generate realistic RTT values based on research paper findings
-            const baseRtt = 800 + Math.random() * 400;
-            const variance = Math.random() * 200 - 100;
-            let rtt = Math.round(baseRtt + variance);
+            // Use configurable threshold from settings
+            const screenThreshold = state.settings.screenThreshold;
+            // Standby threshold is 3x the screen threshold (based on research findings)
+            const standbyThreshold = screenThreshold * 3;
             
+            // Generate realistic RTT values based on research paper findings
             // Simulate different states randomly based on RTT thresholds from research
-            // Screen On: RTT < 1000ms, Screen Off/Standby: RTT 1000-3000ms, Offline: RTT > 3000ms
             const stateRoll = Math.random();
-            let deviceStatus = 'standby';
-            let screenState = 'off';
+            let rtt;
+            let deviceStatus;
+            let screenState;
             
             if (stateRoll < 0.4) {
-                // Screen ON - fast response (research shows <1000ms)
-                rtt = Math.round(200 + Math.random() * 600);
+                // Screen ON - fast response (RTT < screenThreshold)
+                // Generate RTT between 20% and 80% of threshold
+                rtt = Math.round(screenThreshold * 0.2 + Math.random() * screenThreshold * 0.6);
                 deviceStatus = 'online';
                 screenState = 'on';
             } else if (stateRoll < 0.85) {
-                // Screen OFF/Standby - delayed response (research shows 1000-3000ms)
-                rtt = Math.round(1000 + Math.random() * 1500);
+                // Screen OFF/Standby - delayed response (screenThreshold <= RTT < standbyThreshold)
+                rtt = Math.round(screenThreshold + Math.random() * (standbyThreshold - screenThreshold));
                 deviceStatus = 'standby';
                 screenState = 'off';
             } else {
-                // Offline - timeout (research shows >3000ms or timeout)
-                rtt = 5000;
+                // Offline - timeout (RTT >= standbyThreshold)
+                rtt = Math.round(standbyThreshold + Math.random() * 2000);
+                deviceStatus = 'offline';
+                screenState = 'unknown';
+            }
+            
+            // Determine status based on actual RTT vs thresholds (for accuracy verification)
+            // This ensures status matches RTT even if simulation changes
+            if (rtt < screenThreshold) {
+                deviceStatus = 'online';
+                screenState = 'on';
+            } else if (rtt < standbyThreshold) {
+                deviceStatus = 'standby';
+                screenState = 'off';
+            } else {
                 deviceStatus = 'offline';
                 screenState = 'unknown';
             }
@@ -1157,12 +1178,18 @@
             
             // Calculate metrics
             const recentRtts = state.rttHistory.slice(-3).map(h => h.rtt);
-            const movingAvg = Math.round(recentRtts.reduce((a, b) => a + b, 0) / recentRtts.length);
+            const movingAvg = recentRtts.length > 0 
+                ? Math.round(recentRtts.reduce((a, b) => a + b, 0) / recentRtts.length)
+                : 0;
             
             const sortedRtts = [...state.rttHistory.map(h => h.rtt)].sort((a, b) => a - b);
-            const median = sortedRtts.length > 0 
-                ? sortedRtts[Math.floor(sortedRtts.length / 2)] 
-                : 0;
+            let median = 0;
+            if (sortedRtts.length > 0) {
+                const mid = Math.floor(sortedRtts.length / 2);
+                median = sortedRtts.length % 2 === 0
+                    ? Math.round((sortedRtts[mid - 1] + sortedRtts[mid]) / 2)
+                    : sortedRtts[mid];
+            }
             const threshold = state.settings.screenThreshold;
             
             // Update statistics
@@ -1198,28 +1225,71 @@
         
         // ===== OS FINGERPRINTING (from research) =====
         function updateOSFingerprint(rtt) {
-            // Simulate OS fingerprinting based on research findings
-            // Different OS implementations have distinct timing patterns
+            // OS fingerprinting based on research findings about distinct timing patterns
+            // The detection uses historical RTT data for more accurate fingerprinting
             const osIcon = document.getElementById('os-icon');
             const osName = document.getElementById('os-name');
             
-            // Simulate detection based on RTT patterns (simplified simulation)
-            const osRoll = Math.random();
-            let detectedOS = { icon: '🤖', name: 'Android', confidence: 0 };
+            // Use threshold-relative RTT comparison for consistency
+            const screenThreshold = state.settings.screenThreshold;
+            const normalizedRtt = rtt / screenThreshold;
             
-            if (rtt < 500) {
-                // Very fast responses often indicate iOS
-                detectedOS = { icon: '🍎', name: 'iOS', confidence: 85 };
-            } else if (rtt < 800) {
-                detectedOS = { icon: '🤖', name: 'Android', confidence: 78 };
-            } else if (rtt < 1200) {
-                // Web clients often have different patterns
-                detectedOS = osRoll < 0.5 
-                    ? { icon: '🌐', name: 'Web Client', confidence: 72 }
-                    : { icon: '💻', name: 'Desktop', confidence: 68 };
-            } else {
-                detectedOS = { icon: '❓', name: 'Unknown', confidence: 0 };
+            // Build confidence based on RTT history consistency
+            const recentHistory = state.rttHistory.slice(-10);
+            const avgRecentRtt = recentHistory.length > 0
+                ? recentHistory.reduce((sum, h) => sum + h.rtt, 0) / recentHistory.length
+                : rtt;
+            
+            // Calculate RTT variance for confidence scoring
+            const variance = recentHistory.length > 1
+                ? Math.sqrt(recentHistory.reduce((sum, h) => sum + Math.pow(h.rtt - avgRecentRtt, 2), 0) / recentHistory.length)
+                : 0;
+            
+            // Lower variance = higher confidence (more consistent = easier to fingerprint)
+            const baseConfidence = Math.max(50, Math.min(95, 95 - (variance / 10)));
+            
+            let detectedOS = { icon: '❓', name: 'Unknown', confidence: 0 };
+            
+            // Detection based on normalized RTT patterns (relative to threshold)
+            if (normalizedRtt < 0.4) {
+                // Very fast responses - typically iOS with push notification optimization
+                detectedOS = { 
+                    icon: '🍎', 
+                    name: 'iOS', 
+                    confidence: Math.round(baseConfidence * 0.9)
+                };
+            } else if (normalizedRtt < 0.7) {
+                // Moderate fast responses - typically Android
+                detectedOS = { 
+                    icon: '🤖', 
+                    name: 'Android', 
+                    confidence: Math.round(baseConfidence * 0.85)
+                };
+            } else if (normalizedRtt < 1.0) {
+                // Near-threshold responses - could be desktop/web clients
+                // Use average RTT variance to distinguish
+                if (variance < 100) {
+                    detectedOS = { 
+                        icon: '💻', 
+                        name: 'Desktop', 
+                        confidence: Math.round(baseConfidence * 0.75)
+                    };
+                } else {
+                    detectedOS = { 
+                        icon: '🌐', 
+                        name: 'Web Client', 
+                        confidence: Math.round(baseConfidence * 0.7)
+                    };
+                }
+            } else if (normalizedRtt < 2.0) {
+                // Slow responses - device in standby, harder to fingerprint
+                detectedOS = { 
+                    icon: '📱', 
+                    name: 'Mobile (Standby)', 
+                    confidence: Math.round(baseConfidence * 0.5)
+                };
             }
+            // else: Keep as Unknown for very slow/offline responses
             
             osIcon.textContent = detectedOS.icon;
             osName.textContent = detectedOS.confidence > 0 
@@ -1337,12 +1407,34 @@
 
         function updateActivityData(status, rtt) {
             const now = new Date();
-            const slotIndex = now.getHours() * 2 + (now.getMinutes() >= 30 ? 1 : 0);
+            // Calculate slot index: 48 slots for 24 hours (30-minute intervals)
+            // Hours 0-23, minutes 0-29 = first half, 30-59 = second half
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const slotIndex = hours * 2 + (minutes >= 30 ? 1 : 0);
+            
+            // Calculate intensity based on RTT value relative to thresholds
+            // Lower RTT = higher intensity (more active)
+            const screenThreshold = state.settings.screenThreshold;
+            const standbyThreshold = screenThreshold * 3;
+            let intensity;
+            
+            if (rtt < screenThreshold) {
+                // Screen ON: intensity 70-100 based on how fast the response is
+                intensity = Math.round(100 - (rtt / screenThreshold) * 30);
+            } else if (rtt < standbyThreshold) {
+                // Standby: intensity 30-70 based on response time
+                const normalizedRtt = (rtt - screenThreshold) / (standbyThreshold - screenThreshold);
+                intensity = Math.round(70 - normalizedRtt * 40);
+            } else {
+                // Offline: intensity 10-30
+                intensity = Math.max(10, Math.round(30 - Math.min(rtt - standbyThreshold, 2000) / 100));
+            }
             
             state.activityData[slotIndex] = {
                 status: status,
                 rtt: rtt,
-                intensity: status === 'online' ? 90 : status === 'standby' ? 50 : 20
+                intensity: Math.min(100, Math.max(10, intensity))
             };
             
             updateActivityTimeline(state.activityData);
