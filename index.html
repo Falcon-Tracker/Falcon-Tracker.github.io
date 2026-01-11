@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Activity Tracker | RTT Analysis Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'monospace'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        sans: ['Instrument Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: {
+                            dark: '#0a0a0f',
+                            darker: '#050508',
+                            card: '#12121a',
+                            border: '#1f1f2e',
+                            glow: '#00ff88',
+                            warn: '#ffb800',
+                            danger: '#ff3366',
+                            info: '#00b4ff',
+                            purple: '#9d4edd',
+                        }
+                    },
+                    animation: {
+                        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+                        'scan': 'scan 3s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
+                        'radar': 'radar 2s linear infinite',
+                    },
+                    keyframes: {
+                        'pulse-glow': {
+                            '0%, 100%': { opacity: '1', boxShadow: '0 0 20px rgba(0, 255, 136, 0.4)' },
+                            '50%': { opacity: '0.7', boxShadow: '0 0 40px rgba(0, 255, 136, 0.8)' }
+                        },
+                        'scan': {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100%)' }
+                        },
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        'shimmer': {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' }
+                        },
+                        'radar': {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: radial-gradient(ellipse at top, #0f0f1a 0%, #050508 50%, #000 100%);
+        }
+        
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+        }
+        
+        .card-glow {
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        
+        .status-online {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+        }
+        
+        .status-standby {
+            box-shadow: 0 0 20px rgba(255, 184, 0, 0.6);
+        }
+        
+        .status-offline {
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.6);
+        }
+        
+        .noise-overlay {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+        
+        .shimmer-bg {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            background-size: 200% 100%;
+        }
+        
+        .radar-sweep {
+            background: conic-gradient(from 0deg, transparent, rgba(0, 255, 136, 0.3), transparent 30deg);
+        }
+        
+        .qr-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                #1a1a2e,
+                #1a1a2e 10px,
+                #0f0f1a 10px,
+                #0f0f1a 20px
+            );
+        }
+        
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #1f1f2e;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2f2f4e;
+        }
+        
+        .activity-bar {
+            transition: all 0.3s ease;
+        }
+        
+        .activity-bar:hover {
+            filter: brightness(1.3);
+            transform: scaleY(1.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans text-white overflow-x-hidden">
+    <div class="noise-overlay fixed inset-0 pointer-events-none z-50"></div>
+    <div class="grid-bg fixed inset-0 pointer-events-none"></div>
+    
+    <!-- Header -->
+    <header class="relative border-b border-cyber-border/50 backdrop-blur-xl bg-cyber-dark/80 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyber-glow/20 to-cyber-purple/20 border border-cyber-glow/30 flex items-center justify-center overflow-hidden">
+                        <div class="absolute inset-0 radar-sweep animate-radar"></div>
+                        <svg class="w-6 h-6 text-cyber-glow relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="font-display text-xl font-semibold tracking-tight">Device Activity Tracker</h1>
+                        <p class="text-xs text-gray-500 font-mono">RTT Analysis Dashboard v2.0</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div id="connection-status" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyber-card border border-cyber-border">
+                        <span class="w-2 h-2 rounded-full bg-gray-500 animate-pulse" id="status-dot"></span>
+                        <span class="text-sm font-mono text-gray-400" id="status-text">Disconnected</span>
+                    </div>
+                    <button onclick="toggleSettings()" class="p-2 rounded-lg bg-cyber-card border border-cyber-border hover:border-cyber-glow/50 transition-colors">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Platform Selector -->
+        <div class="flex items-center gap-4 mb-8">
+            <div class="flex bg-cyber-card rounded-xl p-1 border border-cyber-border">
+                <button onclick="selectPlatform('whatsapp')" id="btn-whatsapp" class="platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 bg-cyber-glow/20 text-cyber-glow border border-cyber-glow/30">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    WhatsApp
+                </button>
+                <button onclick="selectPlatform('signal')" id="btn-signal" class="platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 3.6c4.636 0 8.4 3.764 8.4 8.4 0 4.636-3.764 8.4-8.4 8.4-4.636 0-8.4-3.764-8.4-8.4 0-4.636 3.764-8.4 8.4-8.4zm0 2.4a6 6 0 100 12 6 6 0 000-12z"/>
+                    </svg>
+                    Signal
+                </button>
+            </div>
+            <div class="h-8 w-px bg-cyber-border"></div>
+            <span class="text-sm text-gray-500 font-mono">Platform: <span id="current-platform" class="text-cyber-glow">WhatsApp</span></span>
+        </div>
+        
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left Column - QR & Connection -->
+            <div class="space-y-6">
+                <!-- QR Code Card -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6 card-glow relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyber-glow/50 to-transparent"></div>
+                    
+                    <h2 class="font-display text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyber-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                        </svg>
+                        Authentication
+                    </h2>
+                    
+                    <div id="qr-container" class="relative aspect-square max-w-[240px] mx-auto rounded-xl overflow-hidden bg-white p-4">
+                        <div id="qr-placeholder" class="w-full h-full flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-cyber-glow/10 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-cyber-glow animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <p class="text-gray-800 text-sm font-medium">Scan with your phone</p>
+                                <p class="text-gray-500 text-xs mt-1">Open WhatsApp &gt; Settings &gt; Linked Devices</p>
+                            </div>
+                        </div>
+                        <canvas id="qr-canvas" class="hidden w-full h-full"></canvas>
+                    </div>
+                    
+                    <div id="auth-status" class="mt-4 text-center">
+                        <button onclick="generateQR()" class="px-4 py-2 bg-cyber-glow/20 text-cyber-glow border border-cyber-glow/30 rounded-lg text-sm font-medium hover:bg-cyber-glow/30 transition-colors">
+                            Generate QR Code
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Target Input -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6 card-glow">
+                    <h2 class="font-display text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyber-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
+                        Target Device
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2 font-mono">Phone Number</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="country-code" value="+1" class="w-20 px-3 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono focus:border-cyber-glow focus:outline-none focus:ring-1 focus:ring-cyber-glow/50">
+                                <input type="tel" id="phone-number" placeholder="7012345678" class="flex-1 px-4 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono placeholder-gray-600 focus:border-cyber-glow focus:outline-none focus:ring-1 focus:ring-cyber-glow/50">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2 font-mono">Format: Country code + number (e.g., +1 7012345678)</p>
+                        </div>
+                        
+                        <button onclick="startTracking()" id="start-tracking-btn" class="w-full py-3 bg-gradient-to-r from-cyber-glow/20 to-cyber-purple/20 text-cyber-glow border border-cyber-glow/30 rounded-xl font-medium hover:from-cyber-glow/30 hover:to-cyber-purple/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Start Tracking
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Probe Method -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <h2 class="font-display text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyber-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Probe Method
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 p-3 rounded-xl bg-cyber-darker border border-cyber-border cursor-pointer hover:border-cyber-glow/30 transition-colors probe-option" data-method="delete">
+                            <input type="radio" name="probe-method" value="delete" checked class="sr-only">
+                            <div class="w-5 h-5 rounded-full border-2 border-cyber-glow flex items-center justify-center">
+                                <div class="w-2.5 h-2.5 rounded-full bg-cyber-glow"></div>
+                            </div>
+                            <div>
+                                <p class="font-medium">Silent Delete</p>
+                                <p class="text-xs text-gray-500">Covert - sends delete request for non-existent message</p>
+                            </div>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 p-3 rounded-xl bg-cyber-darker border border-cyber-border cursor-pointer hover:border-cyber-glow/30 transition-colors probe-option" data-method="reaction">
+                            <input type="radio" name="probe-method" value="reaction" class="sr-only">
+                            <div class="w-5 h-5 rounded-full border-2 border-gray-600 flex items-center justify-center">
+                                <div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>
+                            </div>
+                            <div>
+                                <p class="font-medium">Reaction</p>
+                                <p class="text-xs text-gray-500">Sends random emoji reaction to non-existent message</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="mt-4 p-3 rounded-xl bg-cyber-warn/10 border border-cyber-warn/20">
+                        <p class="text-xs text-cyber-warn flex items-start gap-2">
+                            <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            <span>For educational purposes only. Never track without consent.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Center Column - Main Dashboard -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Device Status Card -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6 card-glow relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyber-glow/50 to-transparent"></div>
+                    
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-display text-lg font-semibold flex items-center gap-2">
+                            <svg class="w-5 h-5 text-cyber-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            Device Status
+                        </h2>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-500 font-mono" id="last-update">Last update: --:--:--</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Status Indicator -->
+                        <div class="md:col-span-1">
+                            <div id="status-card" class="relative p-6 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700/50 text-center">
+                                <div id="status-icon" class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-700/50 flex items-center justify-center">
+                                    <span class="text-4xl" id="status-emoji">📵</span>
+                                </div>
+                                <p class="text-2xl font-display font-bold" id="status-label">Waiting...</p>
+                                <p class="text-sm text-gray-400 mt-1 font-mono" id="status-jid">No target selected</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Metrics Grid -->
+                        <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                            <div class="p-4 rounded-xl bg-cyber-darker border border-cyber-border">
+                                <p class="text-xs text-gray-500 font-mono mb-1">Current RTT</p>
+                                <p class="text-2xl font-display font-bold text-cyber-glow" id="current-rtt">--</p>
+                                <p class="text-xs text-gray-500">ms</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-cyber-darker border border-cyber-border">
+                                <p class="text-xs text-gray-500 font-mono mb-1">Moving Avg (3)</p>
+                                <p class="text-2xl font-display font-bold text-cyber-info" id="moving-avg">--</p>
+                                <p class="text-xs text-gray-500">ms</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-cyber-darker border border-cyber-border">
+                                <p class="text-xs text-gray-500 font-mono mb-1">Median RTT</p>
+                                <p class="text-2xl font-display font-bold text-cyber-purple" id="median-rtt">--</p>
+                                <p class="text-xs text-gray-500">ms</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-cyber-darker border border-cyber-border">
+                                <p class="text-xs text-gray-500 font-mono mb-1">Threshold</p>
+                                <p class="text-2xl font-display font-bold text-cyber-warn" id="threshold">--</p>
+                                <p class="text-xs text-gray-500">ms (90% median)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RTT Chart -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-display text-lg font-semibold flex items-center gap-2">
+                            <svg class="w-5 h-5 text-cyber-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+                            </svg>
+                            RTT History
+                        </h2>
+                        <div class="flex items-center gap-2">
+                            <button onclick="clearHistory()" class="px-3 py-1.5 text-xs bg-cyber-darker border border-cyber-border rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors">
+                                Clear
+                            </button>
+                            <select id="chart-timeframe" onchange="updateChartTimeframe()" class="px-3 py-1.5 text-xs bg-cyber-darker border border-cyber-border rounded-lg text-gray-400 focus:outline-none">
+                                <option value="50">Last 50</option>
+                                <option value="100" selected>Last 100</option>
+                                <option value="200">Last 200</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="relative h-64">
+                        <canvas id="rtt-chart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Activity Timeline -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-display text-lg font-semibold flex items-center gap-2">
+                            <svg class="w-5 h-5 text-cyber-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Activity Timeline (24h)
+                        </h2>
+                    </div>
+                    
+                    <div class="flex items-end gap-1 h-32" id="activity-timeline">
+                        <!-- Activity bars will be inserted here -->
+                    </div>
+                    
+                    <div class="flex justify-between mt-2 text-xs text-gray-500 font-mono">
+                        <span>00:00</span>
+                        <span>06:00</span>
+                        <span>12:00</span>
+                        <span>18:00</span>
+                        <span>23:59</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-center gap-6 mt-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded bg-cyber-glow"></div>
+                            <span class="text-xs text-gray-400">Online</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded bg-cyber-warn"></div>
+                            <span class="text-xs text-gray-400">Standby</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded bg-cyber-danger"></div>
+                            <span class="text-xs text-gray-400">Offline</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Event Log -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-display text-lg font-semibold flex items-center gap-2">
+                            <svg class="w-5 h-5 text-cyber-warn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Event Log
+                        </h2>
+                        <button onclick="clearLogs()" class="text-xs text-gray-500 hover:text-gray-300 transition-colors">Clear All</button>
+                    </div>
+                    
+                    <div id="event-log" class="space-y-2 max-h-64 overflow-y-auto pr-2 font-mono text-sm">
+                        <div class="text-gray-500 text-center py-8">No events yet. Start tracking to see activity logs.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
+        <div class="bg-cyber-card rounded-2xl border border-cyber-border max-w-md w-full p-6 relative">
+            <button onclick="toggleSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <h2 class="font-display text-xl font-semibold mb-6">Settings</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Probe Interval (ms)</label>
+                    <input type="number" id="probe-interval" value="5000" min="1000" max="60000" class="w-full px-4 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono focus:border-cyber-glow focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Timeout (ms)</label>
+                    <input type="number" id="timeout-value" value="5000" min="2000" max="30000" class="w-full px-4 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono focus:border-cyber-glow focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Backend URL</label>
+                    <input type="text" id="backend-url" value="http://localhost:3001" class="w-full px-4 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono focus:border-cyber-glow focus:outline-none">
+                </div>
+                
+                <div class="flex items-center justify-between p-3 rounded-xl bg-cyber-darker border border-cyber-border">
+                    <span class="text-sm">Enable Notifications</span>
+                    <button onclick="toggleNotifications()" id="notifications-toggle" class="relative w-12 h-6 rounded-full bg-gray-700 transition-colors">
+                        <div class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform"></div>
+                    </button>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 rounded-xl bg-cyber-darker border border-cyber-border">
+                    <span class="text-sm">Dark Mode</span>
+                    <button class="relative w-12 h-6 rounded-full bg-cyber-glow transition-colors">
+                        <div class="absolute top-1 right-1 w-4 h-4 rounded-full bg-white"></div>
+                    </button>
+                </div>
+            </div>
+            
+            <button onclick="saveSettings()" class="w-full mt-6 py-3 bg-cyber-glow/20 text-cyber-glow border border-cyber-glow/30 rounded-xl font-medium hover:bg-cyber-glow/30 transition-colors">
+                Save Settings
+            </button>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="border-t border-cyber-border/50 mt-12 py-6 text-center">
+        <p class="text-xs text-gray-500 font-mono">
+            ⚠️ Educational purposes only. Based on research: "Careless Whisper" - University of Vienna & SBA Research
+        </p>
+        <p class="text-xs text-gray-600 mt-2">
+            <a href="https://github.com/gommzystudio/device-activity-tracker" target="_blank" class="hover:text-cyber-glow transition-colors">GitHub Repository</a>
+        </p>
+    </footer>
+
+    <script>
+        // ===== STATE MANAGEMENT =====
+        const state = {
+            platform: 'whatsapp',
+            isConnected: false,
+            isTracking: false,
+            targetNumber: '',
+            probeMethod: 'delete',
+            rttHistory: [],
+            activityData: Array(48).fill(null),
+            settings: {
+                probeInterval: 5000,
+                timeout: 5000,
+                backendUrl: 'http://localhost:3001',
+                notifications: false
+            }
+        };
+
+        let rttChart = null;
+        let trackingInterval = null;
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            initActivityTimeline();
+            initProbeMethodListeners();
+            loadSettings();
+            
+            // Simulate connection for demo
+            setTimeout(() => simulateConnection(), 1000);
+        });
+
+        // ===== CHART INITIALIZATION =====
+        function initChart() {
+            const ctx = document.getElementById('rtt-chart').getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 256);
+            gradient.addColorStop(0, 'rgba(0, 255, 136, 0.3)');
+            gradient.addColorStop(1, 'rgba(0, 255, 136, 0)');
+            
+            rttChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'RTT (ms)',
+                        data: [],
+                        borderColor: '#00ff88',
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#00ff88',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2,
+                        borderWidth: 2
+                    }, {
+                        label: 'Threshold',
+                        data: [],
+                        borderColor: '#ffb800',
+                        borderDash: [5, 5],
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#12121a',
+                            borderColor: '#1f1f2e',
+                            borderWidth: 1,
+                            padding: 12,
+                            titleFont: {
+                                family: 'JetBrains Mono',
+                                size: 12
+                            },
+                            bodyFont: {
+                                family: 'JetBrains Mono',
+                                size: 11
+                            },
+                            displayColors: true,
+                            callbacks: {
+                                title: (items) => items[0]?.label || '',
+                                label: (item) => ` ${item.dataset.label}: ${item.raw}ms`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: {
+                                color: 'rgba(31, 31, 46, 0.5)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    family: 'JetBrains Mono',
+                                    size: 10
+                                },
+                                maxRotation: 0,
+                                maxTicksLimit: 10
+                            }
+                        },
+                        y: {
+                            display: true,
+                            grid: {
+                                color: 'rgba(31, 31, 46, 0.5)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    family: 'JetBrains Mono',
+                                    size: 10
+                                },
+                                callback: (value) => value + 'ms'
+                            },
+                            suggestedMin: 0
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== ACTIVITY TIMELINE =====
+        function initActivityTimeline() {
+            const container = document.getElementById('activity-timeline');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 48; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'activity-bar flex-1 rounded-t bg-gray-700/50 cursor-pointer';
+                bar.style.height = '10%';
+                bar.title = `${Math.floor(i / 2)}:${(i % 2) * 30 === 0 ? '00' : '30'} - No data`;
+                container.appendChild(bar);
+            }
+        }
+
+        function updateActivityTimeline(data) {
+            const bars = document.querySelectorAll('.activity-bar');
+            data.forEach((activity, index) => {
+                if (activity && bars[index]) {
+                    const bar = bars[index];
+                    const height = Math.max(10, Math.min(100, activity.intensity));
+                    bar.style.height = `${height}%`;
+                    
+                    if (activity.status === 'online') {
+                        bar.className = 'activity-bar flex-1 rounded-t bg-cyber-glow cursor-pointer';
+                    } else if (activity.status === 'standby') {
+                        bar.className = 'activity-bar flex-1 rounded-t bg-cyber-warn cursor-pointer';
+                    } else {
+                        bar.className = 'activity-bar flex-1 rounded-t bg-cyber-danger cursor-pointer';
+                    }
+                    
+                    const hour = Math.floor(index / 2);
+                    const min = (index % 2) * 30;
+                    bar.title = `${hour}:${min === 0 ? '00' : '30'} - ${activity.status.charAt(0).toUpperCase() + activity.status.slice(1)} (${activity.rtt}ms)`;
+                }
+            });
+        }
+
+        // ===== PROBE METHOD =====
+        function initProbeMethodListeners() {
+            document.querySelectorAll('.probe-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const method = option.dataset.method;
+                    state.probeMethod = method;
+                    
+                    document.querySelectorAll('.probe-option').forEach(opt => {
+                        const radio = opt.querySelector('input[type="radio"]');
+                        const dot = opt.querySelector('.rounded-full');
+                        const innerDot = dot.querySelector('div');
+                        
+                        if (opt.dataset.method === method) {
+                            radio.checked = true;
+                            dot.classList.remove('border-gray-600');
+                            dot.classList.add('border-cyber-glow');
+                            innerDot.classList.remove('bg-transparent');
+                            innerDot.classList.add('bg-cyber-glow');
+                        } else {
+                            radio.checked = false;
+                            dot.classList.add('border-gray-600');
+                            dot.classList.remove('border-cyber-glow');
+                            innerDot.classList.add('bg-transparent');
+                            innerDot.classList.remove('bg-cyber-glow');
+                        }
+                    });
+                    
+                    addLog('info', `Probe method changed to: ${method === 'delete' ? 'Silent Delete' : 'Reaction'}`);
+                });
+            });
+        }
+
+        // ===== PLATFORM SELECTION =====
+        function selectPlatform(platform) {
+            state.platform = platform;
+            
+            const waBtn = document.getElementById('btn-whatsapp');
+            const sigBtn = document.getElementById('btn-signal');
+            const platformLabel = document.getElementById('current-platform');
+            
+            if (platform === 'whatsapp') {
+                waBtn.className = 'platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 bg-cyber-glow/20 text-cyber-glow border border-cyber-glow/30';
+                sigBtn.className = 'platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white';
+                platformLabel.textContent = 'WhatsApp';
+            } else {
+                sigBtn.className = 'platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 bg-cyber-info/20 text-cyber-info border border-cyber-info/30';
+                waBtn.className = 'platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white';
+                platformLabel.textContent = 'Signal';
+            }
+            
+            addLog('info', `Platform switched to ${platform.charAt(0).toUpperCase() + platform.slice(1)}`);
+        }
+
+        // ===== QR CODE =====
+        function generateQR() {
+            const placeholder = document.getElementById('qr-placeholder');
+            placeholder.innerHTML = `
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-cyber-glow flex items-center justify-center animate-pulse">
+                        <svg class="w-8 h-8 text-cyber-dark animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-gray-800 text-sm font-medium">Generating QR...</p>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                // Simulate QR code generation with a pattern
+                placeholder.innerHTML = `
+                    <div class="w-full h-full bg-white p-2">
+                        <svg viewBox="0 0 100 100" class="w-full h-full">
+                            ${generateQRPattern()}
+                        </svg>
+                    </div>
+                `;
+                
+                document.getElementById('auth-status').innerHTML = `
+                    <p class="text-sm text-gray-400">Scan with your phone</p>
+                    <p class="text-xs text-gray-500 mt-1">Open WhatsApp &gt; Settings &gt; Linked Devices</p>
+                `;
+                
+                addLog('success', 'QR code generated. Waiting for scan...');
+                
+                // Simulate successful scan after delay
+                setTimeout(() => simulateConnection(), 3000);
+            }, 1500);
+        }
+
+        function generateQRPattern() {
+            let pattern = '';
+            const size = 20;
+            const cellSize = 100 / size;
+            
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    // Create a pseudo-random but deterministic pattern
+                    const isBlack = (
+                        (i < 3 && j < 3) || 
+                        (i < 3 && j > size - 4) || 
+                        (i > size - 4 && j < 3) ||
+                        Math.sin(i * 7 + j * 11) > 0.2
+                    );
+                    
+                    if (isBlack) {
+                        pattern += `<rect x="${j * cellSize}" y="${i * cellSize}" width="${cellSize}" height="${cellSize}" fill="#000"/>`;
+                    }
+                }
+            }
+            
+            return pattern;
+        }
+
+        // ===== CONNECTION SIMULATION =====
+        function simulateConnection() {
+            state.isConnected = true;
+            
+            document.getElementById('status-dot').className = 'w-2 h-2 rounded-full bg-cyber-glow animate-pulse';
+            document.getElementById('status-text').textContent = 'Connected';
+            document.getElementById('status-text').className = 'text-sm font-mono text-cyber-glow';
+            
+            document.getElementById('auth-status').innerHTML = `
+                <div class="flex items-center justify-center gap-2 text-cyber-glow">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span class="text-sm font-medium">Authenticated</span>
+                </div>
+            `;
+            
+            addLog('success', 'Successfully connected to ' + state.platform.charAt(0).toUpperCase() + state.platform.slice(1));
+        }
+
+        // ===== TRACKING =====
+        function startTracking() {
+            const countryCode = document.getElementById('country-code').value.replace('+', '');
+            const phoneNumber = document.getElementById('phone-number').value.replace(/\D/g, '');
+            
+            if (!phoneNumber) {
+                addLog('error', 'Please enter a valid phone number');
+                return;
+            }
+            
+            if (!state.isConnected) {
+                addLog('error', 'Please connect first by scanning the QR code');
+                return;
+            }
+            
+            state.targetNumber = countryCode + phoneNumber;
+            state.isTracking = true;
+            
+            const btn = document.getElementById('start-tracking-btn');
+            btn.innerHTML = `
+                <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Tracking...
+            `;
+            btn.onclick = stopTracking;
+            
+            document.getElementById('status-jid').textContent = `${state.targetNumber}@s.whatsapp.net`;
+            
+            addLog('info', `Started tracking: +${state.targetNumber}`);
+            addLog('info', `Probe method: ${state.probeMethod === 'delete' ? 'Silent Delete (covert)' : 'Reaction'}`);
+            
+            // Start simulating data
+            simulateTracking();
+            trackingInterval = setInterval(simulateTracking, state.settings.probeInterval);
+        }
+
+        function stopTracking() {
+            state.isTracking = false;
+            
+            if (trackingInterval) {
+                clearInterval(trackingInterval);
+                trackingInterval = null;
+            }
+            
+            const btn = document.getElementById('start-tracking-btn');
+            btn.innerHTML = `
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Start Tracking
+            `;
+            btn.onclick = startTracking;
+            
+            addLog('info', 'Tracking stopped');
+        }
+
+        function simulateTracking() {
+            // Generate realistic RTT values
+            const baseRtt = 800 + Math.random() * 400;
+            const variance = Math.random() * 200 - 100;
+            let rtt = Math.round(baseRtt + variance);
+            
+            // Simulate different states randomly
+            const stateRoll = Math.random();
+            let deviceStatus = 'standby';
+            
+            if (stateRoll < 0.4) {
+                rtt = Math.round(200 + Math.random() * 300);
+                deviceStatus = 'online';
+            } else if (stateRoll < 0.85) {
+                rtt = Math.round(800 + Math.random() * 600);
+                deviceStatus = 'standby';
+            } else {
+                rtt = 5000;
+                deviceStatus = 'offline';
+            }
+            
+            // Update state
+            state.rttHistory.push({
+                rtt: rtt,
+                timestamp: new Date(),
+                status: deviceStatus
+            });
+            
+            // Keep history limited
+            const timeframe = parseInt(document.getElementById('chart-timeframe').value);
+            if (state.rttHistory.length > timeframe) {
+                state.rttHistory = state.rttHistory.slice(-timeframe);
+            }
+            
+            // Calculate metrics
+            const recentRtts = state.rttHistory.slice(-3).map(h => h.rtt);
+            const movingAvg = Math.round(recentRtts.reduce((a, b) => a + b, 0) / recentRtts.length);
+            
+            const sortedRtts = [...state.rttHistory.map(h => h.rtt)].sort((a, b) => a - b);
+            const median = sortedRtts.length > 0 
+                ? sortedRtts[Math.floor(sortedRtts.length / 2)] 
+                : 0;
+            const threshold = Math.round(median * 0.9);
+            
+            // Update UI
+            updateStatusCard(deviceStatus, rtt);
+            updateMetrics(rtt, movingAvg, median, threshold);
+            updateChart();
+            updateActivityData(deviceStatus, rtt);
+            
+            // Log event
+            const statusEmoji = deviceStatus === 'online' ? '🟢' : deviceStatus === 'standby' ? '🟡' : '🔴';
+            addLog(deviceStatus === 'offline' ? 'warn' : 'success', 
+                `${statusEmoji} ${deviceStatus.toUpperCase()} | RTT: ${rtt}ms | Avg: ${movingAvg}ms | Threshold: ${threshold}ms`);
+        }
+
+        function updateStatusCard(status, rtt) {
+            const card = document.getElementById('status-card');
+            const icon = document.getElementById('status-icon');
+            const emoji = document.getElementById('status-emoji');
+            const label = document.getElementById('status-label');
+            
+            // Update timestamp
+            document.getElementById('last-update').textContent = `Last update: ${new Date().toLocaleTimeString()}`;
+            
+            if (status === 'online') {
+                card.className = 'relative p-6 rounded-xl bg-gradient-to-br from-cyber-glow/20 to-cyber-glow/5 border border-cyber-glow/30 text-center status-online';
+                icon.className = 'w-20 h-20 mx-auto mb-4 rounded-full bg-cyber-glow/20 flex items-center justify-center';
+                emoji.textContent = '📱';
+                label.textContent = 'Online';
+                label.className = 'text-2xl font-display font-bold text-cyber-glow';
+            } else if (status === 'standby') {
+                card.className = 'relative p-6 rounded-xl bg-gradient-to-br from-cyber-warn/20 to-cyber-warn/5 border border-cyber-warn/30 text-center status-standby';
+                icon.className = 'w-20 h-20 mx-auto mb-4 rounded-full bg-cyber-warn/20 flex items-center justify-center';
+                emoji.textContent = '💤';
+                label.textContent = 'Standby';
+                label.className = 'text-2xl font-display font-bold text-cyber-warn';
+            } else {
+                card.className = 'relative p-6 rounded-xl bg-gradient-to-br from-cyber-danger/20 to-cyber-danger/5 border border-cyber-danger/30 text-center status-offline';
+                icon.className = 'w-20 h-20 mx-auto mb-4 rounded-full bg-cyber-danger/20 flex items-center justify-center';
+                emoji.textContent = '📵';
+                label.textContent = 'Offline';
+                label.className = 'text-2xl font-display font-bold text-cyber-danger';
+            }
+        }
+
+        function updateMetrics(rtt, movingAvg, median, threshold) {
+            document.getElementById('current-rtt').textContent = rtt;
+            document.getElementById('moving-avg').textContent = movingAvg;
+            document.getElementById('median-rtt').textContent = median;
+            document.getElementById('threshold').textContent = threshold;
+        }
+
+        function updateChart() {
+            const labels = state.rttHistory.map((h, i) => {
+                const time = new Date(h.timestamp);
+                return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            });
+            
+            const rttData = state.rttHistory.map(h => h.rtt);
+            
+            const sortedRtts = [...rttData].sort((a, b) => a - b);
+            const median = sortedRtts.length > 0 ? sortedRtts[Math.floor(sortedRtts.length / 2)] : 0;
+            const threshold = Math.round(median * 0.9);
+            const thresholdData = new Array(rttData.length).fill(threshold);
+            
+            rttChart.data.labels = labels;
+            rttChart.data.datasets[0].data = rttData;
+            rttChart.data.datasets[1].data = thresholdData;
+            rttChart.update('none');
+        }
+
+        function updateActivityData(status, rtt) {
+            const now = new Date();
+            const slotIndex = now.getHours() * 2 + (now.getMinutes() >= 30 ? 1 : 0);
+            
+            state.activityData[slotIndex] = {
+                status: status,
+                rtt: rtt,
+                intensity: status === 'online' ? 90 : status === 'standby' ? 50 : 20
+            };
+            
+            updateActivityTimeline(state.activityData);
+        }
+
+        // ===== LOGGING =====
+        function addLog(type, message) {
+            const log = document.getElementById('event-log');
+            const time = new Date().toLocaleTimeString();
+            
+            const typeColors = {
+                'success': 'text-cyber-glow',
+                'info': 'text-cyber-info',
+                'warn': 'text-cyber-warn',
+                'error': 'text-cyber-danger'
+            };
+            
+            const entry = document.createElement('div');
+            entry.className = `flex items-start gap-3 p-2 rounded-lg hover:bg-cyber-darker/50 transition-colors`;
+            entry.innerHTML = `
+                <span class="text-gray-500 text-xs whitespace-nowrap">${time}</span>
+                <span class="${typeColors[type] || 'text-gray-400'}">${message}</span>
+            `;
+            
+            // Remove placeholder if exists
+            const placeholder = log.querySelector('.text-gray-500.text-center');
+            if (placeholder) {
+                placeholder.remove();
+            }
+            
+            log.insertBefore(entry, log.firstChild);
+            
+            // Keep log limited
+            while (log.children.length > 100) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        function clearLogs() {
+            const log = document.getElementById('event-log');
+            log.innerHTML = '<div class="text-gray-500 text-center py-8">Log cleared</div>';
+        }
+
+        function clearHistory() {
+            state.rttHistory = [];
+            rttChart.data.labels = [];
+            rttChart.data.datasets[0].data = [];
+            rttChart.data.datasets[1].data = [];
+            rttChart.update();
+            addLog('info', 'RTT history cleared');
+        }
+
+        function updateChartTimeframe() {
+            const timeframe = parseInt(document.getElementById('chart-timeframe').value);
+            state.rttHistory = state.rttHistory.slice(-timeframe);
+            updateChart();
+        }
+
+        // ===== SETTINGS =====
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('tracker-settings');
+            if (saved) {
+                state.settings = { ...state.settings, ...JSON.parse(saved) };
+                document.getElementById('probe-interval').value = state.settings.probeInterval;
+                document.getElementById('timeout-value').value = state.settings.timeout;
+                document.getElementById('backend-url').value = state.settings.backendUrl;
+            }
+        }
+
+        function saveSettings() {
+            state.settings.probeInterval = parseInt(document.getElementById('probe-interval').value);
+            state.settings.timeout = parseInt(document.getElementById('timeout-value').value);
+            state.settings.backendUrl = document.getElementById('backend-url').value;
+            
+            localStorage.setItem('tracker-settings', JSON.stringify(state.settings));
+            
+            addLog('success', 'Settings saved');
+            toggleSettings();
+            
+            // Restart tracking with new interval if active
+            if (state.isTracking && trackingInterval) {
+                clearInterval(trackingInterval);
+                trackingInterval = setInterval(simulateTracking, state.settings.probeInterval);
+            }
+        }
+
+        function toggleNotifications() {
+            state.settings.notifications = !state.settings.notifications;
+            const toggle = document.getElementById('notifications-toggle');
+            const dot = toggle.querySelector('div');
+            
+            if (state.settings.notifications) {
+                toggle.className = 'relative w-12 h-6 rounded-full bg-cyber-glow transition-colors';
+                dot.className = 'absolute top-1 right-1 w-4 h-4 rounded-full bg-white transition-transform';
+                
+                if (Notification.permission !== 'granted') {
+                    Notification.requestPermission();
+                }
+            } else {
+                toggle.className = 'relative w-12 h-6 rounded-full bg-gray-700 transition-colors';
+                dot.className = 'absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform';
+            }
+        }
+
+        // ===== KEYBOARD SHORTCUTS =====
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('settings-modal');
+                if (!modal.classList.contains('hidden')) {
+                    toggleSettings();
+                }
+            }
+            
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveSettings();
+            }
+        });
+    </script>
+</body>
+</html>
