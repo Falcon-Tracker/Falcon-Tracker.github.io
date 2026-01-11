@@ -2398,6 +2398,7 @@
             updateOSFingerprint(rtt);
             updateDeviceSessions(deviceStatus);
             updateNetworkQuality();
+            updateAdvancedAnalytics();
             
             // Play sound alert if status changed
             if (state.lastStatus !== null && state.lastStatus !== deviceStatus) {
@@ -3165,6 +3166,238 @@
             link.download = 'audit-log-' + new Date().toISOString().slice(0,10) + '.csv';
             link.click();
             showToast('Audit log exported', 'success');
+        }
+        
+        // ===== ADVANCED ANALYTICS UPDATES =====
+        function updateAdvancedAnalytics() {
+            if (state.rttHistory.length < 3) return;
+            
+            updateSleepPatternAnalysis();
+            updatePeakActivityHours();
+            updateRttDistribution();
+            updateBehavioralAnalytics();
+            updateHeatmapCalendar();
+        }
+        
+        function updateSleepPatternAnalysis() {
+            // Analyze offline periods to detect sleep patterns
+            const offlinePeriods = [];
+            let currentOfflineStart = null;
+            
+            state.rttHistory.forEach((entry, i) => {
+                if (entry.status === 'offline' || entry.status === 'standby') {
+                    if (!currentOfflineStart) {
+                        currentOfflineStart = new Date(entry.timestamp);
+                    }
+                } else {
+                    if (currentOfflineStart) {
+                        const end = new Date(entry.timestamp);
+                        const durationHours = (end - currentOfflineStart) / (1000 * 60 * 60);
+                        if (durationHours >= 0.5) { // At least 30 min offline
+                            offlinePeriods.push({
+                                start: currentOfflineStart,
+                                end: end,
+                                duration: durationHours
+                            });
+                        }
+                        currentOfflineStart = null;
+                    }
+                }
+            });
+            
+            // Find the longest offline period as likely sleep
+            if (offlinePeriods.length > 0) {
+                const longestPeriod = offlinePeriods.reduce((max, p) => p.duration > max.duration ? p : max);
+                const startHour = longestPeriod.start.getHours();
+                const endHour = longestPeriod.end.getHours();
+                
+                document.getElementById('sleep-window').textContent = 
+                    `${startHour.toString().padStart(2, '0')}:00 - ${endHour.toString().padStart(2, '0')}:00`;
+                
+                document.getElementById('avg-sleep-duration').textContent = 
+                    `${longestPeriod.duration.toFixed(1)} hours`;
+            }
+            
+            // Detect timezone based on activity patterns
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.getElementById('detected-timezone').textContent = timezone || 'UTC';
+        }
+        
+        function updatePeakActivityHours() {
+            // Count activity per hour
+            const hourlyActivity = Array(24).fill(0);
+            
+            state.rttHistory.forEach(entry => {
+                const hour = new Date(entry.timestamp).getHours();
+                if (entry.status === 'online') {
+                    hourlyActivity[hour] += 2;
+                } else if (entry.status === 'standby') {
+                    hourlyActivity[hour] += 1;
+                }
+            });
+            
+            const maxActivity = Math.max(...hourlyActivity, 1);
+            
+            // Update chart bars
+            const container = document.getElementById('peak-hours-chart');
+            if (container) {
+                const bars = container.children;
+                for (let i = 0; i < 24 && i < bars.length; i++) {
+                    const height = Math.max(10, (hourlyActivity[i] / maxActivity) * 100);
+                    bars[i].style.height = `${height}%`;
+                    bars[i].className = hourlyActivity[i] > maxActivity * 0.7 
+                        ? 'flex-1 rounded-t bg-cyber-glow transition-all'
+                        : hourlyActivity[i] > maxActivity * 0.3
+                        ? 'flex-1 rounded-t bg-cyber-warn transition-all'
+                        : 'flex-1 rounded-t bg-gray-700/50 transition-all';
+                }
+            }
+            
+            // Find most and least active hours
+            const mostActiveHour = hourlyActivity.indexOf(Math.max(...hourlyActivity));
+            const leastActiveHour = hourlyActivity.indexOf(Math.min(...hourlyActivity));
+            
+            document.getElementById('most-active-hour').textContent = 
+                `${mostActiveHour.toString().padStart(2, '0')}:00`;
+            document.getElementById('least-active-hour').textContent = 
+                `${leastActiveHour.toString().padStart(2, '0')}:00`;
+        }
+        
+        function updateRttDistribution() {
+            // Create RTT histogram buckets (10 buckets, 500ms each)
+            const buckets = Array(10).fill(0);
+            const rtts = state.rttHistory.map(h => h.rtt);
+            
+            rtts.forEach(rtt => {
+                const bucketIndex = Math.min(Math.floor(rtt / 500), 9);
+                buckets[bucketIndex]++;
+            });
+            
+            const maxBucket = Math.max(...buckets, 1);
+            
+            // Update histogram bars
+            const container = document.getElementById('rtt-histogram');
+            if (container) {
+                const bars = container.children;
+                for (let i = 0; i < 10 && i < bars.length; i++) {
+                    const height = Math.max(10, (buckets[i] / maxBucket) * 100);
+                    bars[i].style.height = `${height}%`;
+                }
+            }
+            
+            // Calculate RTT statistics
+            if (rtts.length > 0) {
+                const min = Math.min(...rtts);
+                const max = Math.max(...rtts);
+                const avg = Math.round(rtts.reduce((a, b) => a + b, 0) / rtts.length);
+                
+                // Calculate standard deviation
+                const squaredDiffs = rtts.map(r => Math.pow(r - avg, 2));
+                const avgSquaredDiff = squaredDiffs.reduce((a, b) => a + b, 0) / rtts.length;
+                const stdDev = Math.round(Math.sqrt(avgSquaredDiff));
+                
+                document.getElementById('rtt-min').textContent = `${min}ms`;
+                document.getElementById('rtt-avg').textContent = `${avg}ms`;
+                document.getElementById('rtt-max').textContent = `${max}ms`;
+                document.getElementById('rtt-std-dev').textContent = `±${stdDev}ms`;
+            }
+        }
+        
+        function updateBehavioralAnalytics() {
+            // Calculate usage score (0-100)
+            const onlineRatio = state.stats.online / Math.max(state.stats.total, 1);
+            const usageScore = Math.round(onlineRatio * 100);
+            document.getElementById('usage-frequency-score').textContent = `${usageScore}/100`;
+            
+            // Predictive status based on recent history
+            const recentHistory = state.rttHistory.slice(-10);
+            const recentOnline = recentHistory.filter(h => h.status === 'online').length;
+            let predictiveStatus = 'Unknown';
+            
+            if (recentHistory.length >= 5) {
+                if (recentOnline >= 7) {
+                    predictiveStatus = 'Likely Online';
+                } else if (recentOnline >= 4) {
+                    predictiveStatus = 'Intermittent';
+                } else {
+                    predictiveStatus = 'Likely Offline';
+                }
+            }
+            document.getElementById('predictive-status').textContent = predictiveStatus;
+            
+            // Calculate average session duration
+            let sessions = [];
+            let sessionStart = null;
+            
+            state.rttHistory.forEach((entry, i) => {
+                if (entry.status === 'online') {
+                    if (!sessionStart) {
+                        sessionStart = new Date(entry.timestamp);
+                    }
+                } else {
+                    if (sessionStart) {
+                        const end = new Date(entry.timestamp);
+                        const durationMin = (end - sessionStart) / (1000 * 60);
+                        if (durationMin > 0) {
+                            sessions.push(durationMin);
+                        }
+                        sessionStart = null;
+                    }
+                }
+            });
+            
+            if (sessions.length > 0) {
+                const avgSession = Math.round(sessions.reduce((a, b) => a + b, 0) / sessions.length);
+                document.getElementById('avg-session-duration').textContent = `${avgSession}min`;
+            }
+        }
+        
+        function updateHeatmapCalendar() {
+            const container = document.getElementById('heatmap-calendar');
+            if (!container) return;
+            
+            // Count activity per day in the last 365 days
+            const dailyActivity = {};
+            
+            state.rttHistory.forEach(entry => {
+                const date = new Date(entry.timestamp).toLocaleDateString();
+                if (!dailyActivity[date]) {
+                    dailyActivity[date] = { online: 0, total: 0 };
+                }
+                dailyActivity[date].total++;
+                if (entry.status === 'online') {
+                    dailyActivity[date].online++;
+                }
+            });
+            
+            // Update heatmap cells
+            const cells = container.children;
+            let totalActivity = 0;
+            
+            for (let i = 0; i < 365 && i < cells.length; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - (364 - i));
+                const dateStr = date.toLocaleDateString();
+                
+                const activity = dailyActivity[dateStr];
+                let level = 0;
+                
+                if (activity) {
+                    const ratio = activity.online / Math.max(activity.total, 1);
+                    totalActivity += activity.total;
+                    
+                    if (ratio > 0.8) level = 5;
+                    else if (ratio > 0.6) level = 4;
+                    else if (ratio > 0.4) level = 3;
+                    else if (ratio > 0.2) level = 2;
+                    else if (ratio > 0) level = 1;
+                }
+                
+                cells[i].className = `heatmap-cell heatmap-level-${level}`;
+                cells[i].title = `${dateStr}: ${activity ? activity.total + ' probes' : 'No data'}`;
+            }
+            
+            document.getElementById('total-activity-count').textContent = totalActivity;
         }
         
         // ===== ANALYTICS INITIALIZATION =====
