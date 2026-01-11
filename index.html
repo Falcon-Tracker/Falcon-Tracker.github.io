@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Device Activity Tracker | RTT Analysis Dashboard</title>
+    <meta name="description" content="Falcon Tracker - Advanced RTT Analysis Dashboard for monitoring device activity through silent delivery receipts on instant messengers">
+    <meta name="keywords" content="Falcon Tracker, RTT Analysis, Device Tracking, WhatsApp, Signal, Threema, Delivery Receipts">
+    <meta name="author" content="Falcon Tracker Team">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Falcon Tracker | RTT Analysis Dashboard">
+    <meta property="og:description" content="Advanced device activity monitoring through RTT analysis of delivery receipts">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#00ff88">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🦅%3C/text%3E%3C/svg%3E">
+    <title>Falcon Tracker | RTT Analysis Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -162,24 +171,27 @@
         <div class="max-w-7xl mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyber-glow/20 to-cyber-purple/20 border border-cyber-glow/30 flex items-center justify-center overflow-hidden">
+                    <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-cyber-glow/20 to-cyber-purple/20 border border-cyber-glow/30 flex items-center justify-center overflow-hidden" role="img" aria-label="Falcon Tracker Logo">
                         <div class="absolute inset-0 radar-sweep animate-radar"></div>
-                        <svg class="w-6 h-6 text-cyber-glow relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
-                        </svg>
+                        <span class="text-2xl relative z-10">🦅</span>
                     </div>
                     <div>
-                        <h1 class="font-display text-xl font-semibold tracking-tight">Device Activity Tracker</h1>
+                        <h1 class="font-display text-xl font-semibold tracking-tight">Falcon Tracker</h1>
                         <p class="text-xs text-gray-500 font-mono">RTT Analysis Dashboard v2.0</p>
                     </div>
                 </div>
                 
                 <div class="flex items-center gap-4">
-                    <div id="connection-status" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyber-card border border-cyber-border">
-                        <span class="w-2 h-2 rounded-full bg-gray-500 animate-pulse" id="status-dot"></span>
+                    <div id="connection-status" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyber-card border border-cyber-border" role="status" aria-live="polite">
+                        <span class="w-2 h-2 rounded-full bg-gray-500 animate-pulse" id="status-dot" aria-hidden="true"></span>
                         <span class="text-sm font-mono text-gray-400" id="status-text">Disconnected</span>
                     </div>
-                    <button onclick="toggleSettings()" class="p-2 rounded-lg bg-cyber-card border border-cyber-border hover:border-cyber-glow/50 transition-colors">
+                    <button onclick="toggleHelp()" class="p-2 rounded-lg bg-cyber-card border border-cyber-border hover:border-cyber-info/50 transition-colors" aria-label="Show keyboard shortcuts" title="Keyboard Shortcuts (?)">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </button>
+                    <button onclick="toggleSettings()" class="p-2 rounded-lg bg-cyber-card border border-cyber-border hover:border-cyber-glow/50 transition-colors" aria-label="Open settings">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -192,22 +204,28 @@
     
     <main class="max-w-7xl mx-auto px-6 py-8">
         <!-- Platform Selector -->
-        <div class="flex items-center gap-4 mb-8">
-            <div class="flex bg-cyber-card rounded-xl p-1 border border-cyber-border">
-                <button onclick="selectPlatform('whatsapp')" id="btn-whatsapp" class="platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 bg-cyber-glow/20 text-cyber-glow border border-cyber-glow/30">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+        <div class="flex flex-wrap items-center gap-4 mb-8">
+            <div class="flex bg-cyber-card rounded-xl p-1 border border-cyber-border" role="tablist" aria-label="Select messaging platform">
+                <button onclick="selectPlatform('whatsapp')" id="btn-whatsapp" role="tab" aria-selected="true" class="platform-btn px-4 sm:px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 bg-cyber-glow/20 text-cyber-glow border border-cyber-glow/30">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                     </svg>
-                    WhatsApp
+                    <span class="hidden sm:inline">WhatsApp</span>
                 </button>
-                <button onclick="selectPlatform('signal')" id="btn-signal" class="platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <button onclick="selectPlatform('signal')" id="btn-signal" role="tab" aria-selected="false" class="platform-btn px-4 sm:px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 3.6c4.636 0 8.4 3.764 8.4 8.4 0 4.636-3.764 8.4-8.4 8.4-4.636 0-8.4-3.764-8.4-8.4 0-4.636 3.764-8.4 8.4-8.4zm0 2.4a6 6 0 100 12 6 6 0 000-12z"/>
                     </svg>
-                    Signal
+                    <span class="hidden sm:inline">Signal</span>
+                </button>
+                <button onclick="selectPlatform('threema')" id="btn-threema" role="tab" aria-selected="false" class="platform-btn px-4 sm:px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-2 16h-2v-2h2v2zm0-4h-2V8h2v4zm4 4h-2v-2h2v2zm0-4h-2V8h2v4zm4 4h-2v-2h2v2zm0-4h-2V8h2v4z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Threema</span>
                 </button>
             </div>
-            <div class="h-8 w-px bg-cyber-border"></div>
+            <div class="h-8 w-px bg-cyber-border hidden sm:block" aria-hidden="true"></div>
             <span class="text-sm text-gray-500 font-mono">Platform: <span id="current-platform" class="text-cyber-glow">WhatsApp</span></span>
         </div>
         
@@ -236,7 +254,7 @@
                                     </svg>
                                 </div>
                                 <p class="text-gray-800 text-sm font-medium">Scan with your phone</p>
-                                <p class="text-gray-500 text-xs mt-1">Open WhatsApp &gt; Settings &gt; Linked Devices</p>
+                                <p class="text-gray-500 text-xs mt-1">Open Messenger &gt; Settings &gt; Linked Devices</p>
                             </div>
                         </div>
                         <canvas id="qr-canvas" class="hidden w-full h-full"></canvas>
@@ -280,17 +298,17 @@
                 <!-- Probe Method -->
                 <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
                     <h2 class="font-display text-lg font-semibold mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-cyber-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-cyber-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
                         Probe Method
                     </h2>
                     
-                    <div class="space-y-3">
+                    <div class="space-y-3" role="radiogroup" aria-label="Select probe method">
                         <label class="flex items-center gap-3 p-3 rounded-xl bg-cyber-darker border border-cyber-border cursor-pointer hover:border-cyber-glow/30 transition-colors probe-option" data-method="delete">
                             <input type="radio" name="probe-method" value="delete" checked class="sr-only">
-                            <div class="w-5 h-5 rounded-full border-2 border-cyber-glow flex items-center justify-center">
+                            <div class="w-5 h-5 rounded-full border-2 border-cyber-glow flex items-center justify-center" aria-hidden="true">
                                 <div class="w-2.5 h-2.5 rounded-full bg-cyber-glow"></div>
                             </div>
                             <div>
@@ -301,23 +319,58 @@
                         
                         <label class="flex items-center gap-3 p-3 rounded-xl bg-cyber-darker border border-cyber-border cursor-pointer hover:border-cyber-glow/30 transition-colors probe-option" data-method="reaction">
                             <input type="radio" name="probe-method" value="reaction" class="sr-only">
-                            <div class="w-5 h-5 rounded-full border-2 border-gray-600 flex items-center justify-center">
+                            <div class="w-5 h-5 rounded-full border-2 border-gray-600 flex items-center justify-center" aria-hidden="true">
                                 <div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>
                             </div>
                             <div>
-                                <p class="font-medium">Reaction</p>
-                                <p class="text-xs text-gray-500">Sends random emoji reaction to non-existent message</p>
+                                <p class="font-medium">Self-Reaction</p>
+                                <p class="text-xs text-gray-500">Covert - reacts to own message (no notification)</p>
+                            </div>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 p-3 rounded-xl bg-cyber-darker border border-cyber-border cursor-pointer hover:border-cyber-glow/30 transition-colors probe-option" data-method="edit">
+                            <input type="radio" name="probe-method" value="edit" class="sr-only">
+                            <div class="w-5 h-5 rounded-full border-2 border-gray-600 flex items-center justify-center" aria-hidden="true">
+                                <div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>
+                            </div>
+                            <div>
+                                <p class="font-medium">Message Edit</p>
+                                <p class="text-xs text-gray-500">Semi-covert - edit triggers delivery receipt</p>
                             </div>
                         </label>
                     </div>
                     
-                    <div class="mt-4 p-3 rounded-xl bg-cyber-warn/10 border border-cyber-warn/20">
+                    <div class="mt-4 p-3 rounded-xl bg-cyber-warn/10 border border-cyber-warn/20" role="alert">
                         <p class="text-xs text-cyber-warn flex items-start gap-2">
-                            <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
-                            <span>For educational purposes only. Never track without consent.</span>
+                            <span>For educational and research purposes only. Based on "Careless Whisper" research. Never track without consent.</span>
                         </p>
+                    </div>
+                </div>
+                
+                <!-- Multi-Device Sessions (From Research) -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <h2 class="font-display text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyber-info" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        Detected Devices
+                    </h2>
+                    <p class="text-xs text-gray-500 mb-3">Multi-device tracking via independent delivery receipts</p>
+                    
+                    <div id="device-sessions" class="space-y-2">
+                        <div class="p-3 rounded-lg bg-cyber-darker border border-cyber-border flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl" aria-label="Smartphone">📱</span>
+                                <div>
+                                    <p class="text-sm font-medium">Primary Device</p>
+                                    <p class="text-xs text-gray-500">Waiting for detection...</p>
+                                </div>
+                            </div>
+                            <span class="w-2 h-2 rounded-full bg-gray-600" aria-label="Status unknown"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -326,11 +379,11 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- Device Status Card -->
                 <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6 card-glow relative overflow-hidden">
-                    <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyber-glow/50 to-transparent"></div>
+                    <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyber-glow/50 to-transparent" aria-hidden="true"></div>
                     
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="font-display text-lg font-semibold flex items-center gap-2">
-                            <svg class="w-5 h-5 text-cyber-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-cyber-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                             </svg>
                             Device Status
@@ -343,12 +396,29 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Status Indicator -->
                         <div class="md:col-span-1">
-                            <div id="status-card" class="relative p-6 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700/50 text-center">
+                            <div id="status-card" class="relative p-6 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700/50 text-center" role="status" aria-live="polite">
                                 <div id="status-icon" class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-700/50 flex items-center justify-center">
-                                    <span class="text-4xl" id="status-emoji">📵</span>
+                                    <span class="text-4xl" id="status-emoji" aria-hidden="true">📵</span>
                                 </div>
                                 <p class="text-2xl font-display font-bold" id="status-label">Waiting...</p>
                                 <p class="text-sm text-gray-400 mt-1 font-mono" id="status-jid">No target selected</p>
+                                
+                                <!-- Screen State Indicator (from research) -->
+                                <div class="mt-3 pt-3 border-t border-gray-700/50">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <span class="text-xs text-gray-500">Screen:</span>
+                                        <span id="screen-state" class="text-xs font-mono px-2 py-0.5 rounded bg-gray-700 text-gray-400">Unknown</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- OS Fingerprint (from research) -->
+                            <div class="mt-4 p-3 rounded-xl bg-cyber-darker border border-cyber-border">
+                                <p class="text-xs text-gray-500 font-mono mb-2">OS Fingerprint</p>
+                                <div class="flex items-center gap-2" id="os-fingerprint">
+                                    <span class="text-lg" id="os-icon" aria-hidden="true">❓</span>
+                                    <span class="text-sm font-medium" id="os-name">Detecting...</span>
+                                </div>
                             </div>
                         </div>
                         
@@ -372,7 +442,30 @@
                             <div class="p-4 rounded-xl bg-cyber-darker border border-cyber-border">
                                 <p class="text-xs text-gray-500 font-mono mb-1">Threshold</p>
                                 <p class="text-2xl font-display font-bold text-cyber-warn" id="threshold">--</p>
-                                <p class="text-xs text-gray-500">ms (90% median)</p>
+                                <p class="text-xs text-gray-500">ms (Screen On/Off)</p>
+                            </div>
+                            
+                            <!-- Statistics Summary -->
+                            <div class="col-span-2 p-4 rounded-xl bg-cyber-darker border border-cyber-border">
+                                <p class="text-xs text-gray-500 font-mono mb-3">Session Statistics</p>
+                                <div class="grid grid-cols-4 gap-3 text-center">
+                                    <div>
+                                        <p class="text-lg font-bold text-cyber-glow" id="stat-online">0</p>
+                                        <p class="text-xs text-gray-500">Online</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-lg font-bold text-cyber-warn" id="stat-standby">0</p>
+                                        <p class="text-xs text-gray-500">Standby</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-lg font-bold text-cyber-danger" id="stat-offline">0</p>
+                                        <p class="text-xs text-gray-500">Offline</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-lg font-bold text-cyber-info" id="stat-total">0</p>
+                                        <p class="text-xs text-gray-500">Total</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -382,16 +475,22 @@
                 <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="font-display text-lg font-semibold flex items-center gap-2">
-                            <svg class="w-5 h-5 text-cyber-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-cyber-info" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
                             </svg>
                             RTT History
                         </h2>
                         <div class="flex items-center gap-2">
+                            <button onclick="exportData()" class="px-3 py-1.5 text-xs bg-cyber-darker border border-cyber-border rounded-lg text-gray-400 hover:text-white hover:border-cyber-info/50 transition-colors flex items-center gap-1" aria-label="Export data as CSV">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Export
+                            </button>
                             <button onclick="clearHistory()" class="px-3 py-1.5 text-xs bg-cyber-darker border border-cyber-border rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors">
                                 Clear
                             </button>
-                            <select id="chart-timeframe" onchange="updateChartTimeframe()" class="px-3 py-1.5 text-xs bg-cyber-darker border border-cyber-border rounded-lg text-gray-400 focus:outline-none">
+                            <select id="chart-timeframe" onchange="updateChartTimeframe()" class="px-3 py-1.5 text-xs bg-cyber-darker border border-cyber-border rounded-lg text-gray-400 focus:outline-none" aria-label="Select chart timeframe">
                                 <option value="50">Last 50</option>
                                 <option value="100" selected>Last 100</option>
                                 <option value="200">Last 200</option>
@@ -399,7 +498,7 @@
                         </div>
                     </div>
                     <div class="relative h-64">
-                        <canvas id="rtt-chart"></canvas>
+                        <canvas id="rtt-chart" aria-label="RTT History Chart"></canvas>
                     </div>
                 </div>
                 
@@ -407,18 +506,19 @@
                 <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="font-display text-lg font-semibold flex items-center gap-2">
-                            <svg class="w-5 h-5 text-cyber-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-cyber-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             Activity Timeline (24h)
                         </h2>
+                        <span class="text-xs text-gray-500">Screen On/Off patterns based on RTT</span>
                     </div>
                     
-                    <div class="flex items-end gap-1 h-32" id="activity-timeline">
+                    <div class="flex items-end gap-1 h-32" id="activity-timeline" role="img" aria-label="24-hour activity timeline showing device status">
                         <!-- Activity bars will be inserted here -->
                     </div>
                     
-                    <div class="flex justify-between mt-2 text-xs text-gray-500 font-mono">
+                    <div class="flex justify-between mt-2 text-xs text-gray-500 font-mono" aria-hidden="true">
                         <span>00:00</span>
                         <span>06:00</span>
                         <span>12:00</span>
@@ -428,16 +528,16 @@
                     
                     <div class="flex items-center justify-center gap-6 mt-4">
                         <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded bg-cyber-glow"></div>
-                            <span class="text-xs text-gray-400">Online</span>
+                            <div class="w-3 h-3 rounded bg-cyber-glow" aria-hidden="true"></div>
+                            <span class="text-xs text-gray-400">Screen On (RTT &lt;1s)</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded bg-cyber-warn"></div>
-                            <span class="text-xs text-gray-400">Standby</span>
+                            <div class="w-3 h-3 rounded bg-cyber-warn" aria-hidden="true"></div>
+                            <span class="text-xs text-gray-400">Standby (RTT 1-3s)</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded bg-cyber-danger"></div>
-                            <span class="text-xs text-gray-400">Offline</span>
+                            <div class="w-3 h-3 rounded bg-cyber-danger" aria-hidden="true"></div>
+                            <span class="text-xs text-gray-400">Offline (RTT &gt;3s)</span>
                         </div>
                     </div>
                 </div>
@@ -463,42 +563,49 @@
     </main>
     
     <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6" role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <div class="bg-cyber-card rounded-2xl border border-cyber-border max-w-md w-full p-6 relative">
-            <button onclick="toggleSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button onclick="toggleSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-white" aria-label="Close settings">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
             
-            <h2 class="font-display text-xl font-semibold mb-6">Settings</h2>
+            <h2 id="settings-title" class="font-display text-xl font-semibold mb-6">Settings</h2>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm text-gray-400 mb-2">Probe Interval (ms)</label>
+                    <label for="probe-interval" class="block text-sm text-gray-400 mb-2">Probe Interval (ms)</label>
                     <input type="number" id="probe-interval" value="5000" min="1000" max="60000" class="w-full px-4 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono focus:border-cyber-glow focus:outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Research suggests 1Hz (1000ms) for best results</p>
                 </div>
                 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-2">Timeout (ms)</label>
+                    <label for="timeout-value" class="block text-sm text-gray-400 mb-2">Timeout (ms)</label>
                     <input type="number" id="timeout-value" value="5000" min="2000" max="30000" class="w-full px-4 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono focus:border-cyber-glow focus:outline-none">
                 </div>
                 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-2">Backend URL</label>
+                    <label for="backend-url" class="block text-sm text-gray-400 mb-2">Backend URL</label>
                     <input type="text" id="backend-url" value="http://localhost:3001" class="w-full px-4 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono focus:border-cyber-glow focus:outline-none">
+                </div>
+                
+                <div>
+                    <label for="screen-threshold" class="block text-sm text-gray-400 mb-2">Screen On Threshold (ms)</label>
+                    <input type="number" id="screen-threshold" value="1000" min="500" max="3000" class="w-full px-4 py-3 bg-cyber-darker border border-cyber-border rounded-xl text-white font-mono focus:border-cyber-glow focus:outline-none">
+                    <p class="text-xs text-gray-500 mt-1">RTT below this = Screen On (research: ~1000ms)</p>
                 </div>
                 
                 <div class="flex items-center justify-between p-3 rounded-xl bg-cyber-darker border border-cyber-border">
                     <span class="text-sm">Enable Notifications</span>
-                    <button onclick="toggleNotifications()" id="notifications-toggle" class="relative w-12 h-6 rounded-full bg-gray-700 transition-colors">
+                    <button onclick="toggleNotifications()" id="notifications-toggle" class="relative w-12 h-6 rounded-full bg-gray-700 transition-colors" role="switch" aria-checked="false">
                         <div class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform"></div>
                     </button>
                 </div>
                 
                 <div class="flex items-center justify-between p-3 rounded-xl bg-cyber-darker border border-cyber-border">
                     <span class="text-sm">Dark Mode</span>
-                    <button class="relative w-12 h-6 rounded-full bg-cyber-glow transition-colors">
+                    <button class="relative w-12 h-6 rounded-full bg-cyber-glow transition-colors" role="switch" aria-checked="true" disabled>
                         <div class="absolute top-1 right-1 w-4 h-4 rounded-full bg-white"></div>
                     </button>
                 </div>
@@ -510,14 +617,97 @@
         </div>
     </div>
     
+    <!-- Help Modal (Keyboard Shortcuts) -->
+    <div id="help-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <div class="bg-cyber-card rounded-2xl border border-cyber-border max-w-md w-full p-6 relative">
+            <button onclick="toggleHelp()" class="absolute top-4 right-4 text-gray-400 hover:text-white" aria-label="Close help">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <h2 id="help-title" class="font-display text-xl font-semibold mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-cyber-info" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Keyboard Shortcuts
+            </h2>
+            
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                    <span class="text-sm text-gray-300">Open Settings</span>
+                    <kbd class="px-2 py-1 text-xs bg-cyber-border rounded font-mono">Ctrl + ,</kbd>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                    <span class="text-sm text-gray-300">Save Settings</span>
+                    <kbd class="px-2 py-1 text-xs bg-cyber-border rounded font-mono">Ctrl + S</kbd>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                    <span class="text-sm text-gray-300">Close Modal</span>
+                    <kbd class="px-2 py-1 text-xs bg-cyber-border rounded font-mono">Esc</kbd>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                    <span class="text-sm text-gray-300">Show Help</span>
+                    <kbd class="px-2 py-1 text-xs bg-cyber-border rounded font-mono">?</kbd>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                    <span class="text-sm text-gray-300">Export Data</span>
+                    <kbd class="px-2 py-1 text-xs bg-cyber-border rounded font-mono">Ctrl + E</kbd>
+                </div>
+                <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                    <span class="text-sm text-gray-300">Clear History</span>
+                    <kbd class="px-2 py-1 text-xs bg-cyber-border rounded font-mono">Ctrl + L</kbd>
+                </div>
+            </div>
+            
+            <div class="mt-6 p-4 rounded-xl bg-cyber-info/10 border border-cyber-info/20">
+                <h3 class="text-sm font-semibold text-cyber-info mb-2">About RTT Analysis</h3>
+                <p class="text-xs text-gray-400">
+                    Based on "Careless Whisper" research: RTT values below ~1000ms typically indicate the device screen is ON (active state), 
+                    while values above indicate standby or offline states. Multi-device setups generate independent receipts per device.
+                </p>
+            </div>
+        </div>
+    </div>
+    
     <!-- Footer -->
-    <footer class="border-t border-cyber-border/50 mt-12 py-6 text-center">
-        <p class="text-xs text-gray-500 font-mono">
-            ⚠️ Educational purposes only. Based on research: "Careless Whisper" - University of Vienna & SBA Research
-        </p>
-        <p class="text-xs text-gray-600 mt-2">
-            <a href="https://github.com/gommzystudio/device-activity-tracker" target="_blank" class="hover:text-cyber-glow transition-colors">GitHub Repository</a>
-        </p>
+    <footer class="border-t border-cyber-border/50 mt-12 py-8 text-center" role="contentinfo">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+                <span class="text-2xl" aria-hidden="true">🦅</span>
+                <div>
+                    <h3 class="font-display text-lg font-semibold text-white">Falcon Tracker</h3>
+                    <p class="text-xs text-gray-500">RTT Analysis Dashboard for Delivery Receipt Monitoring</p>
+                </div>
+            </div>
+            
+            <div class="p-4 rounded-xl bg-cyber-card/50 border border-cyber-border mb-6">
+                <p class="text-xs text-gray-400 mb-2">
+                    <strong>Research Attribution:</strong> Based on "Careless Whisper: Exploiting Silent Delivery Receipts to Monitor Users on Mobile Instant Messengers"
+                </p>
+                <p class="text-xs text-gray-500">
+                    Gabriel K. Gegenhuber, Maximilian Günther, Markus Maier, Aljosha Judmayer, Florian Holzbauer, Philipp É. Frenzel, Johanna Ullrich
+                </p>
+                <p class="text-xs text-gray-500 mt-1">
+                    University of Vienna, Faculty of Computer Science & SBA Research | <a href="https://arxiv.org/abs/2411.11194" target="_blank" rel="noopener noreferrer" class="text-cyber-info hover:text-cyber-glow transition-colors">arXiv:2411.11194</a>
+                </p>
+            </div>
+            
+            <div class="flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500">
+                <span>⚠️ Educational & Research Purposes Only</span>
+                <span class="hidden sm:inline">|</span>
+                <a href="https://github.com/Falcon-Tracker/Falcon-Tracker.github.io" target="_blank" rel="noopener noreferrer" class="hover:text-cyber-glow transition-colors flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    GitHub Repository
+                </a>
+            </div>
+            
+            <p class="text-xs text-gray-600 mt-4">
+                © 2024 Falcon Tracker. Never track individuals without their explicit consent.
+            </p>
+        </div>
     </footer>
 
     <script>
@@ -530,11 +720,19 @@
             probeMethod: 'delete',
             rttHistory: [],
             activityData: Array(48).fill(null),
+            detectedDevices: [],
+            stats: {
+                online: 0,
+                standby: 0,
+                offline: 0,
+                total: 0
+            },
             settings: {
                 probeInterval: 5000,
                 timeout: 5000,
                 backendUrl: 'http://localhost:3001',
-                notifications: false
+                notifications: false,
+                screenThreshold: 1000 // RTT threshold for screen on/off detection
             }
         };
 
@@ -720,7 +918,7 @@
                         }
                     });
                     
-                    addLog('info', `Probe method changed to: ${method === 'delete' ? 'Silent Delete' : 'Reaction'}`);
+                    addLog('info', `Probe method changed to: ${method === 'delete' ? 'Silent Delete' : method === 'reaction' ? 'Self-Reaction' : 'Message Edit'}`);
                 });
             });
         }
@@ -731,24 +929,49 @@
             
             const waBtn = document.getElementById('btn-whatsapp');
             const sigBtn = document.getElementById('btn-signal');
+            const threeBtn = document.getElementById('btn-threema');
             const platformLabel = document.getElementById('current-platform');
             
+            // Reset all buttons
+            const resetClass = 'platform-btn px-4 sm:px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white';
+            waBtn.className = resetClass;
+            sigBtn.className = resetClass;
+            threeBtn.className = resetClass;
+            waBtn.setAttribute('aria-selected', 'false');
+            sigBtn.setAttribute('aria-selected', 'false');
+            threeBtn.setAttribute('aria-selected', 'false');
+            
+            // Set active platform
             if (platform === 'whatsapp') {
-                waBtn.className = 'platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 bg-cyber-glow/20 text-cyber-glow border border-cyber-glow/30';
-                sigBtn.className = 'platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white';
+                waBtn.className = 'platform-btn px-4 sm:px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 bg-cyber-glow/20 text-cyber-glow border border-cyber-glow/30';
+                waBtn.setAttribute('aria-selected', 'true');
                 platformLabel.textContent = 'WhatsApp';
-            } else {
-                sigBtn.className = 'platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 bg-cyber-info/20 text-cyber-info border border-cyber-info/30';
-                waBtn.className = 'platform-btn px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 text-gray-400 hover:text-white';
+                platformLabel.className = 'text-cyber-glow';
+            } else if (platform === 'signal') {
+                sigBtn.className = 'platform-btn px-4 sm:px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 bg-cyber-info/20 text-cyber-info border border-cyber-info/30';
+                sigBtn.setAttribute('aria-selected', 'true');
                 platformLabel.textContent = 'Signal';
+                platformLabel.className = 'text-cyber-info';
+            } else if (platform === 'threema') {
+                threeBtn.className = 'platform-btn px-4 sm:px-6 py-2.5 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 bg-cyber-purple/20 text-cyber-purple border border-cyber-purple/30';
+                threeBtn.setAttribute('aria-selected', 'true');
+                platformLabel.textContent = 'Threema';
+                platformLabel.className = 'text-cyber-purple';
             }
             
             addLog('info', `Platform switched to ${platform.charAt(0).toUpperCase() + platform.slice(1)}`);
+            
+            // Show Threema limitation warning
+            if (platform === 'threema') {
+                addLog('warn', 'Note: Threema has limited covert probing capabilities (no silent reactions)');
+            }
         }
 
         // ===== QR CODE =====
         function generateQR() {
             const placeholder = document.getElementById('qr-placeholder');
+            const platformName = state.platform.charAt(0).toUpperCase() + state.platform.slice(1);
+            
             placeholder.innerHTML = `
                 <div class="text-center">
                     <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-cyber-glow flex items-center justify-center animate-pulse">
@@ -757,7 +980,7 @@
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                     </div>
-                    <p class="text-gray-800 text-sm font-medium">Generating QR...</p>
+                    <p class="text-gray-800 text-sm font-medium">Generating QR for ${platformName}...</p>
                 </div>
             `;
             
@@ -773,10 +996,10 @@
                 
                 document.getElementById('auth-status').innerHTML = `
                     <p class="text-sm text-gray-400">Scan with your phone</p>
-                    <p class="text-xs text-gray-500 mt-1">Open WhatsApp &gt; Settings &gt; Linked Devices</p>
+                    <p class="text-xs text-gray-500 mt-1">Open ${platformName} &gt; Settings &gt; Linked Devices</p>
                 `;
                 
-                addLog('success', 'QR code generated. Waiting for scan...');
+                addLog('success', `QR code generated for ${platformName}. Waiting for scan...`);
                 
                 // Simulate successful scan after delay
                 setTimeout(() => simulateConnection(), 3000);
@@ -855,10 +1078,14 @@
             `;
             btn.onclick = stopTracking;
             
-            document.getElementById('status-jid').textContent = `${state.targetNumber}@s.whatsapp.net`;
+            // Set JID based on platform
+            const jidSuffix = state.platform === 'whatsapp' ? '@s.whatsapp.net' 
+                : state.platform === 'signal' ? '@signal' 
+                : '@threema.ch';
+            document.getElementById('status-jid').textContent = `${state.targetNumber}${jidSuffix}`;
             
-            addLog('info', `Started tracking: +${state.targetNumber}`);
-            addLog('info', `Probe method: ${state.probeMethod === 'delete' ? 'Silent Delete (covert)' : 'Reaction'}`);
+            addLog('info', `Started tracking: +${state.targetNumber} on ${state.platform.charAt(0).toUpperCase() + state.platform.slice(1)}`);
+            addLog('info', `Probe method: ${state.probeMethod === 'delete' ? 'Silent Delete' : state.probeMethod === 'reaction' ? 'Self-Reaction' : 'Message Edit'}`);
             
             // Start simulating data
             simulateTracking();
@@ -886,31 +1113,40 @@
         }
 
         function simulateTracking() {
-            // Generate realistic RTT values
+            // Generate realistic RTT values based on research paper findings
             const baseRtt = 800 + Math.random() * 400;
             const variance = Math.random() * 200 - 100;
             let rtt = Math.round(baseRtt + variance);
             
-            // Simulate different states randomly
+            // Simulate different states randomly based on RTT thresholds from research
+            // Screen On: RTT < 1000ms, Screen Off/Standby: RTT 1000-3000ms, Offline: RTT > 3000ms
             const stateRoll = Math.random();
             let deviceStatus = 'standby';
+            let screenState = 'off';
             
             if (stateRoll < 0.4) {
-                rtt = Math.round(200 + Math.random() * 300);
+                // Screen ON - fast response (research shows <1000ms)
+                rtt = Math.round(200 + Math.random() * 600);
                 deviceStatus = 'online';
+                screenState = 'on';
             } else if (stateRoll < 0.85) {
-                rtt = Math.round(800 + Math.random() * 600);
+                // Screen OFF/Standby - delayed response (research shows 1000-3000ms)
+                rtt = Math.round(1000 + Math.random() * 1500);
                 deviceStatus = 'standby';
+                screenState = 'off';
             } else {
+                // Offline - timeout (research shows >3000ms or timeout)
                 rtt = 5000;
                 deviceStatus = 'offline';
+                screenState = 'unknown';
             }
             
             // Update state
             state.rttHistory.push({
                 rtt: rtt,
                 timestamp: new Date(),
-                status: deviceStatus
+                status: deviceStatus,
+                screenState: screenState
             });
             
             // Keep history limited
@@ -927,40 +1163,143 @@
             const median = sortedRtts.length > 0 
                 ? sortedRtts[Math.floor(sortedRtts.length / 2)] 
                 : 0;
-            const threshold = Math.round(median * 0.9);
+            const threshold = state.settings.screenThreshold;
+            
+            // Update statistics
+            updateStatistics(deviceStatus);
             
             // Update UI
-            updateStatusCard(deviceStatus, rtt);
+            updateStatusCard(deviceStatus, rtt, screenState);
             updateMetrics(rtt, movingAvg, median, threshold);
             updateChart();
             updateActivityData(deviceStatus, rtt);
+            updateOSFingerprint(rtt);
+            updateDeviceSessions(deviceStatus);
             
             // Log event
             const statusEmoji = deviceStatus === 'online' ? '🟢' : deviceStatus === 'standby' ? '🟡' : '🔴';
+            const screenEmoji = screenState === 'on' ? '📱' : screenState === 'off' ? '💤' : '❓';
             addLog(deviceStatus === 'offline' ? 'warn' : 'success', 
-                `${statusEmoji} ${deviceStatus.toUpperCase()} | RTT: ${rtt}ms | Avg: ${movingAvg}ms | Threshold: ${threshold}ms`);
+                `${statusEmoji} ${deviceStatus.toUpperCase()} | Screen: ${screenEmoji} | RTT: ${rtt}ms | Avg: ${movingAvg}ms`);
+        }
+        
+        // ===== STATISTICS =====
+        function updateStatistics(status) {
+            state.stats.total++;
+            if (status === 'online') state.stats.online++;
+            else if (status === 'standby') state.stats.standby++;
+            else state.stats.offline++;
+            
+            document.getElementById('stat-online').textContent = state.stats.online;
+            document.getElementById('stat-standby').textContent = state.stats.standby;
+            document.getElementById('stat-offline').textContent = state.stats.offline;
+            document.getElementById('stat-total').textContent = state.stats.total;
+        }
+        
+        // ===== OS FINGERPRINTING (from research) =====
+        function updateOSFingerprint(rtt) {
+            // Simulate OS fingerprinting based on research findings
+            // Different OS implementations have distinct timing patterns
+            const osIcon = document.getElementById('os-icon');
+            const osName = document.getElementById('os-name');
+            
+            // Simulate detection based on RTT patterns (simplified simulation)
+            const osRoll = Math.random();
+            let detectedOS = { icon: '🤖', name: 'Android', confidence: 0 };
+            
+            if (rtt < 500) {
+                // Very fast responses often indicate iOS
+                detectedOS = { icon: '🍎', name: 'iOS', confidence: 85 };
+            } else if (rtt < 800) {
+                detectedOS = { icon: '🤖', name: 'Android', confidence: 78 };
+            } else if (rtt < 1200) {
+                // Web clients often have different patterns
+                detectedOS = osRoll < 0.5 
+                    ? { icon: '🌐', name: 'Web Client', confidence: 72 }
+                    : { icon: '💻', name: 'Desktop', confidence: 68 };
+            } else {
+                detectedOS = { icon: '❓', name: 'Unknown', confidence: 0 };
+            }
+            
+            osIcon.textContent = detectedOS.icon;
+            osName.textContent = detectedOS.confidence > 0 
+                ? `${detectedOS.name} (${detectedOS.confidence}%)`
+                : detectedOS.name;
+        }
+        
+        // ===== MULTI-DEVICE SESSIONS (from research) =====
+        function updateDeviceSessions(status) {
+            const container = document.getElementById('device-sessions');
+            
+            // Simulate multi-device detection (research shows independent receipts per device)
+            const devices = [
+                { type: 'smartphone', icon: '📱', name: 'Primary Smartphone', platform: state.platform },
+                { type: 'desktop', icon: '💻', name: 'Desktop Client', platform: 'web' },
+                { type: 'web', icon: '🌐', name: 'Web Browser', platform: 'web' }
+            ];
+            
+            // Randomly simulate device activity
+            const activeDevices = devices.filter(() => Math.random() > 0.3);
+            
+            if (activeDevices.length > 0) {
+                container.innerHTML = activeDevices.map((device, idx) => {
+                    const isActive = Math.random() > 0.4;
+                    const deviceRtt = isActive ? Math.round(200 + Math.random() * 500) : Math.round(1500 + Math.random() * 1000);
+                    const statusColor = isActive ? 'bg-cyber-glow' : 'bg-cyber-warn';
+                    const statusText = isActive ? 'Active' : 'Standby';
+                    
+                    return `
+                        <div class="p-3 rounded-lg bg-cyber-darker border border-cyber-border flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">${device.icon}</span>
+                                <div>
+                                    <p class="text-sm font-medium">${device.name}</p>
+                                    <p class="text-xs text-gray-500">RTT: ${deviceRtt}ms</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-400">${statusText}</span>
+                                <span class="w-2 h-2 rounded-full ${statusColor} animate-pulse"></span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
         }
 
-        function updateStatusCard(status, rtt) {
+        function updateStatusCard(status, rtt, screenState) {
             const card = document.getElementById('status-card');
             const icon = document.getElementById('status-icon');
             const emoji = document.getElementById('status-emoji');
             const label = document.getElementById('status-label');
+            const screenStateEl = document.getElementById('screen-state');
             
             // Update timestamp
             document.getElementById('last-update').textContent = `Last update: ${new Date().toLocaleTimeString()}`;
+            
+            // Update screen state indicator
+            if (screenState === 'on') {
+                screenStateEl.textContent = 'ON';
+                screenStateEl.className = 'text-xs font-mono px-2 py-0.5 rounded bg-cyber-glow/20 text-cyber-glow';
+            } else if (screenState === 'off') {
+                screenStateEl.textContent = 'OFF';
+                screenStateEl.className = 'text-xs font-mono px-2 py-0.5 rounded bg-cyber-warn/20 text-cyber-warn';
+            } else {
+                screenStateEl.textContent = 'Unknown';
+                screenStateEl.className = 'text-xs font-mono px-2 py-0.5 rounded bg-gray-700 text-gray-400';
+            }
             
             if (status === 'online') {
                 card.className = 'relative p-6 rounded-xl bg-gradient-to-br from-cyber-glow/20 to-cyber-glow/5 border border-cyber-glow/30 text-center status-online';
                 icon.className = 'w-20 h-20 mx-auto mb-4 rounded-full bg-cyber-glow/20 flex items-center justify-center';
                 emoji.textContent = '📱';
-                label.textContent = 'Online';
+                label.textContent = 'Screen ON';
                 label.className = 'text-2xl font-display font-bold text-cyber-glow';
             } else if (status === 'standby') {
                 card.className = 'relative p-6 rounded-xl bg-gradient-to-br from-cyber-warn/20 to-cyber-warn/5 border border-cyber-warn/30 text-center status-standby';
                 icon.className = 'w-20 h-20 mx-auto mb-4 rounded-full bg-cyber-warn/20 flex items-center justify-center';
                 emoji.textContent = '💤';
-                label.textContent = 'Standby';
+                label.textContent = 'Screen OFF';
                 label.className = 'text-2xl font-display font-bold text-cyber-warn';
             } else {
                 card.className = 'relative p-6 rounded-xl bg-gradient-to-br from-cyber-danger/20 to-cyber-danger/5 border border-cyber-danger/30 text-center status-offline';
@@ -986,9 +1325,8 @@
             
             const rttData = state.rttHistory.map(h => h.rtt);
             
-            const sortedRtts = [...rttData].sort((a, b) => a - b);
-            const median = sortedRtts.length > 0 ? sortedRtts[Math.floor(sortedRtts.length / 2)] : 0;
-            const threshold = Math.round(median * 0.9);
+            // Use screen threshold from settings (based on research: ~1000ms for screen on/off)
+            const threshold = state.settings.screenThreshold;
             const thresholdData = new Array(rttData.length).fill(threshold);
             
             rttChart.data.labels = labels;
@@ -1050,11 +1388,53 @@
 
         function clearHistory() {
             state.rttHistory = [];
+            state.stats = { online: 0, standby: 0, offline: 0, total: 0 };
             rttChart.data.labels = [];
             rttChart.data.datasets[0].data = [];
             rttChart.data.datasets[1].data = [];
             rttChart.update();
+            
+            // Reset statistics display
+            document.getElementById('stat-online').textContent = '0';
+            document.getElementById('stat-standby').textContent = '0';
+            document.getElementById('stat-offline').textContent = '0';
+            document.getElementById('stat-total').textContent = '0';
+            
             addLog('info', 'RTT history cleared');
+        }
+        
+        // ===== EXPORT DATA =====
+        function exportData() {
+            if (state.rttHistory.length === 0) {
+                addLog('warn', 'No data to export');
+                return;
+            }
+            
+            // Create CSV content
+            const headers = ['Timestamp', 'RTT (ms)', 'Status', 'Screen State'];
+            const rows = state.rttHistory.map(h => [
+                new Date(h.timestamp).toISOString(),
+                h.rtt,
+                h.status,
+                h.screenState || 'unknown'
+            ]);
+            
+            const csvContent = [headers, ...rows]
+                .map(row => row.join(','))
+                .join('\n');
+            
+            // Create and trigger download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `falcon-tracker-export-${new Date().toISOString().slice(0,10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            addLog('success', `Exported ${state.rttHistory.length} records to CSV`);
         }
 
         function updateChartTimeframe() {
@@ -1068,14 +1448,20 @@
             const modal = document.getElementById('settings-modal');
             modal.classList.toggle('hidden');
         }
+        
+        function toggleHelp() {
+            const modal = document.getElementById('help-modal');
+            modal.classList.toggle('hidden');
+        }
 
         function loadSettings() {
-            const saved = localStorage.getItem('tracker-settings');
+            const saved = localStorage.getItem('falcon-tracker-settings');
             if (saved) {
                 state.settings = { ...state.settings, ...JSON.parse(saved) };
                 document.getElementById('probe-interval').value = state.settings.probeInterval;
                 document.getElementById('timeout-value').value = state.settings.timeout;
                 document.getElementById('backend-url').value = state.settings.backendUrl;
+                document.getElementById('screen-threshold').value = state.settings.screenThreshold;
             }
         }
 
@@ -1083,8 +1469,9 @@
             state.settings.probeInterval = parseInt(document.getElementById('probe-interval').value);
             state.settings.timeout = parseInt(document.getElementById('timeout-value').value);
             state.settings.backendUrl = document.getElementById('backend-url').value;
+            state.settings.screenThreshold = parseInt(document.getElementById('screen-threshold').value);
             
-            localStorage.setItem('tracker-settings', JSON.stringify(state.settings));
+            localStorage.setItem('falcon-tracker-settings', JSON.stringify(state.settings));
             
             addLog('success', 'Settings saved');
             toggleSettings();
@@ -1103,6 +1490,7 @@
             
             if (state.settings.notifications) {
                 toggle.className = 'relative w-12 h-6 rounded-full bg-cyber-glow transition-colors';
+                toggle.setAttribute('aria-checked', 'true');
                 dot.className = 'absolute top-1 right-1 w-4 h-4 rounded-full bg-white transition-transform';
                 
                 if (Notification.permission !== 'granted') {
@@ -1110,22 +1498,59 @@
                 }
             } else {
                 toggle.className = 'relative w-12 h-6 rounded-full bg-gray-700 transition-colors';
+                toggle.setAttribute('aria-checked', 'false');
                 dot.className = 'absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform';
             }
         }
 
         // ===== KEYBOARD SHORTCUTS =====
         document.addEventListener('keydown', (e) => {
+            // Close modals with Escape
             if (e.key === 'Escape') {
-                const modal = document.getElementById('settings-modal');
-                if (!modal.classList.contains('hidden')) {
+                const settingsModal = document.getElementById('settings-modal');
+                const helpModal = document.getElementById('help-modal');
+                if (!settingsModal.classList.contains('hidden')) {
                     toggleSettings();
+                }
+                if (!helpModal.classList.contains('hidden')) {
+                    toggleHelp();
                 }
             }
             
+            // Save settings with Ctrl+S
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
-                saveSettings();
+                const settingsModal = document.getElementById('settings-modal');
+                if (!settingsModal.classList.contains('hidden')) {
+                    saveSettings();
+                }
+            }
+            
+            // Open settings with Ctrl+,
+            if (e.ctrlKey && e.key === ',') {
+                e.preventDefault();
+                toggleSettings();
+            }
+            
+            // Show help with ?
+            if (e.key === '?' && !e.ctrlKey && !e.altKey) {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    toggleHelp();
+                }
+            }
+            
+            // Export data with Ctrl+E
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                exportData();
+            }
+            
+            // Clear history with Ctrl+L
+            if (e.ctrlKey && e.key === 'l') {
+                e.preventDefault();
+                clearHistory();
             }
         });
     </script>
