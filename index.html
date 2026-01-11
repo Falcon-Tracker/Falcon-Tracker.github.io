@@ -1410,16 +1410,26 @@
                 return;
             }
             
-            // Create CSV content
+            // Create CSV content with proper escaping
             const headers = ['Timestamp', 'RTT (ms)', 'Status', 'Screen State'];
+            
+            // Helper function to escape CSV values
+            const escapeCSV = (value) => {
+                const str = String(value);
+                if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+                    return '"' + str.replace(/"/g, '""') + '"';
+                }
+                return str;
+            };
+            
             const rows = state.rttHistory.map(h => [
-                new Date(h.timestamp).toISOString(),
-                h.rtt,
-                h.status,
-                h.screenState || 'unknown'
+                escapeCSV(new Date(h.timestamp).toISOString()),
+                escapeCSV(h.rtt),
+                escapeCSV(h.status),
+                escapeCSV(h.screenState || 'unknown')
             ]);
             
-            const csvContent = [headers, ...rows]
+            const csvContent = [headers.map(escapeCSV), ...rows]
                 .map(row => row.join(','))
                 .join('\n');
             
@@ -1433,6 +1443,9 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            
+            // Clean up the blob URL to prevent memory leak
+            URL.revokeObjectURL(url);
             
             addLog('success', `Exported ${state.rttHistory.length} records to CSV`);
         }
