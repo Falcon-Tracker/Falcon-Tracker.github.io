@@ -23,6 +23,8 @@
     <meta name="theme-color" content="#00ff88">
     <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dkj22lm1g/image/upload/w_32,h_32,c_fill/v1768133460/Falcon_Tracker_cbgj3k.jpg">
     <link rel="apple-touch-icon" href="https://res.cloudinary.com/dkj22lm1g/image/upload/w_180,h_180,c_fill/v1768133460/Falcon_Tracker_cbgj3k.jpg">
+    <!-- PWA Support -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRmFsY29uIFRyYWNrZXIiLCJzaG9ydF9uYW1lIjoiRmFsY29uIiwiZGVzY3JpcHRpb24iOiJBZHZhbmNlZCBSVFQgQW5hbHlzaXMgRGFzaGJvYXJkIiwic3RhcnRfdXJsIjoiLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwYTBhMGYiLCJ0aGVtZV9jb2xvciI6IiMwMGZmODgiLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9yZXMuY2xvdWRpbmFyeS5jb20vZGtqMjJsbTFnL2ltYWdlL3VwbG9hZC93XzE5MixoXzE5MixjX2ZpbGwvdjE3NjgxMzM0NjAvRmFsY29uX1RyYWNrZXJfY2JnajNrLmpwZyIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9qcGVnIn0seyJzcmMiOiJodHRwczovL3Jlcy5jbG91ZGluYXJ5LmNvbS9ka2oyMmxtMWcvaW1hZ2UvdXBsb2FkL3dfNTEyLGhfNTEyLGNfZmlsbC92MTc2ODEzMzQ2MC9GYWxjb25fVHJhY2tlcl9jYmdqM2suanBnIiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL2pwZWcifV19">
     <title>Falcon Tracker | RTT Analysis Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -292,6 +294,132 @@
         .recent-target-item:last-child {
             border-radius: 0 0 12px 12px;
         }
+        
+        /* ===== NEW FEATURE STYLES ===== */
+        
+        /* Heatmap Calendar */
+        .heatmap-container {
+            display: grid;
+            grid-template-columns: repeat(53, 1fr);
+            gap: 2px;
+        }
+        
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 2px;
+            transition: all 0.2s;
+            cursor: pointer;
+            min-width: 8px;
+            min-height: 8px;
+        }
+        
+        .heatmap-cell:hover {
+            transform: scale(1.3);
+            z-index: 10;
+        }
+        
+        .heatmap-level-0 { background: #1f1f2e; }
+        .heatmap-level-1 { background: rgba(0, 255, 136, 0.2); }
+        .heatmap-level-2 { background: rgba(0, 255, 136, 0.4); }
+        .heatmap-level-3 { background: rgba(0, 255, 136, 0.6); }
+        .heatmap-level-4 { background: rgba(0, 255, 136, 0.8); }
+        .heatmap-level-5 { background: #00ff88; }
+        
+        /* High Contrast Mode */
+        .high-contrast body { background: #000 !important; }
+        .high-contrast .bg-cyber-card { background: #000 !important; border-color: #fff !important; }
+        .high-contrast .text-gray-400, .high-contrast .text-gray-500 { color: #fff !important; }
+        
+        /* Reduced Motion Mode */
+        .reduced-motion * { animation: none !important; transition: none !important; }
+        
+        /* Fullscreen Mode */
+        .fullscreen-mode {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 100;
+            background: #0a0a0f;
+            overflow: auto;
+            padding: 20px;
+        }
+        
+        /* PIN Lock Screen */
+        .lock-screen {
+            position: fixed;
+            inset: 0;
+            background: #0a0a0f;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        .lock-screen:not(.hidden) {
+            display: flex;
+        }
+        
+        .pin-input { display: flex; gap: 10px; justify-content: center; }
+        
+        .pin-digit {
+            width: 50px; height: 60px;
+            text-align: center;
+            font-size: 24px;
+            background: #12121a;
+            border: 2px solid #1f1f2e;
+            border-radius: 12px;
+            color: #00ff88;
+        }
+        
+        .pin-digit:focus { border-color: #00ff88; outline: none; }
+        
+        /* Session Tags */
+        .session-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        .session-tag:hover { opacity: 0.8; }
+        
+        .tag-important { background: rgba(255, 51, 102, 0.2); color: #ff3366; }
+        .tag-sleep { background: rgba(157, 78, 221, 0.2); color: #9d4edd; }
+        .tag-travel { background: rgba(0, 180, 255, 0.2); color: #00b4ff; }
+        .tag-work { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+        
+        /* Alert Rules */
+        .alert-rule { border-left: 3px solid; padding-left: 12px; }
+        .alert-rule-active { border-color: #00ff88; }
+        .alert-rule-inactive { border-color: #666; }
+        
+        /* Confidence Ring */
+        .confidence-ring {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            transition: stroke-dashoffset 1s ease;
+        }
+        
+        /* Stealth Mode - uses opacity instead of visibility for better accessibility */
+        .stealth-mode { background: #000 !important; }
+        .stealth-mode main, .stealth-mode header, .stealth-mode footer { opacity: 0.05; transition: opacity 0.3s; }
+        .stealth-mode:hover main, .stealth-mode:hover header, .stealth-mode:hover footer { opacity: 1; }
+        
+        /* Font Size Controls */
+        .font-size-small { font-size: 12px; }
+        .font-size-normal { font-size: 14px; }
+        .font-size-large { font-size: 16px; }
+        .font-size-xlarge { font-size: 18px; }
+        
+        /* Settings Tabs */
+        .settings-tab { transition: opacity 0.2s; }
+        
+        /* Histogram Bars */
+        .histogram-bar { transition: all 0.3s ease; }
+        .histogram-bar:hover { filter: brightness(1.2); }
     </style>
     <script type="application/ld+json">
     {
@@ -319,6 +447,78 @@
     <div class="noise-overlay fixed inset-0 pointer-events-none z-50"></div>
     <div class="grid-bg fixed inset-0 pointer-events-none"></div>
     
+    <!-- Legal Disclaimer Modal (Ethical Considerations) -->
+    <div id="legal-disclaimer-modal" class="fixed inset-0 bg-black/95 backdrop-blur-sm z-[300] flex items-center justify-center p-6" role="dialog" aria-modal="true" aria-labelledby="disclaimer-title">
+        <div class="bg-cyber-card rounded-2xl border border-cyber-danger/50 max-w-lg w-full p-8 relative">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-cyber-danger/20 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-cyber-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <h2 id="disclaimer-title" class="font-display text-2xl font-bold text-cyber-danger mb-2">⚠️ Legal Disclaimer</h2>
+                <p class="text-gray-400 text-sm">Please read and acknowledge before proceeding</p>
+            </div>
+            
+            <div class="space-y-4 text-sm text-gray-300 max-h-60 overflow-y-auto mb-6 p-4 bg-cyber-darker rounded-lg">
+                <p><strong class="text-white">Educational & Research Tool Only:</strong> Falcon Tracker is designed for educational and security research purposes based on the "Careless Whisper" academic research.</p>
+                
+                <p><strong class="text-cyber-danger">Legal Requirements:</strong></p>
+                <ul class="list-disc list-inside ml-2 space-y-1 text-gray-400">
+                    <li>You MUST have explicit consent from any individual you monitor</li>
+                    <li>Unauthorized surveillance may violate local, state, and federal laws</li>
+                    <li>This includes but not limited to: CFAA, ECPA, GDPR, and similar regulations</li>
+                    <li>Penalties may include criminal prosecution and civil liability</li>
+                </ul>
+                
+                <p><strong class="text-cyber-warn">Acceptable Use:</strong></p>
+                <ul class="list-disc list-inside ml-2 space-y-1 text-gray-400">
+                    <li>Testing your own devices and accounts</li>
+                    <li>Academic research with proper IRB approval</li>
+                    <li>Security auditing with written authorization</li>
+                    <li>Parental monitoring where legally permitted</li>
+                </ul>
+                
+                <p><strong class="text-white">Data Handling:</strong> All data is stored locally in your browser. We do not collect, transmit, or store any tracking data on external servers.</p>
+            </div>
+            
+            <div class="space-y-3">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" id="consent-checkbox" class="mt-1 w-5 h-5 rounded border-cyber-border bg-cyber-darker text-cyber-glow focus:ring-cyber-glow">
+                    <span class="text-sm text-gray-300">I confirm that I have read, understood, and agree to comply with all applicable laws. I will only use this tool for legitimate purposes with proper consent.</span>
+                </label>
+            </div>
+            
+            <button onclick="acceptDisclaimer()" id="accept-disclaimer-btn" disabled class="w-full mt-6 py-3 bg-cyber-glow/20 text-cyber-glow border border-cyber-glow/30 rounded-xl font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-cyber-glow/30">
+                I Accept - Enter Dashboard
+            </button>
+            
+            <p class="text-center text-xs text-gray-500 mt-4">By clicking "I Accept", you acknowledge legal responsibility for your use of this tool.</p>
+        </div>
+    </div>
+    
+    <!-- PIN Lock Screen -->
+    <div id="pin-lock-screen" style="display: none;" class="lock-screen">
+        <div class="text-center">
+            <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-cyber-glow/20 flex items-center justify-center">
+                <svg class="w-10 h-10 text-cyber-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </div>
+            <h2 class="font-display text-xl font-semibold mb-2">Dashboard Locked</h2>
+            <p class="text-gray-500 text-sm mb-6">Enter your PIN to unlock</p>
+            
+            <div class="pin-input mb-4">
+                <input type="password" maxlength="1" class="pin-digit" data-index="0" oninput="handlePinInput(this)" onkeydown="handlePinKeydown(event, this)" aria-label="PIN digit 1">
+                <input type="password" maxlength="1" class="pin-digit" data-index="1" oninput="handlePinInput(this)" onkeydown="handlePinKeydown(event, this)" aria-label="PIN digit 2">
+                <input type="password" maxlength="1" class="pin-digit" data-index="2" oninput="handlePinInput(this)" onkeydown="handlePinKeydown(event, this)" aria-label="PIN digit 3">
+                <input type="password" maxlength="1" class="pin-digit" data-index="3" oninput="handlePinInput(this)" onkeydown="handlePinKeydown(event, this)" aria-label="PIN digit 4">
+            </div>
+            
+            <p id="pin-error" class="text-cyber-danger text-sm" style="display: none;">Incorrect PIN. Please try again.</p>
+        </div>
+    </div>
+    
     <!-- Toast Notification Container -->
     <div id="toast-container" class="toast-container" aria-live="polite"></div>
     
@@ -345,6 +545,51 @@
                         </svg>
                         <span class="text-xs font-mono text-gray-400" id="network-quality">Excellent</span>
                     </div>
+                    
+                    <!-- Accessibility Menu -->
+                    <div class="relative">
+                        <button onclick="toggleAccessibilityMenu()" id="accessibility-btn" class="p-2 rounded-lg bg-cyber-card border border-cyber-border hover:border-cyber-info/50 transition-colors" aria-label="Accessibility options" title="Accessibility (Alt+A)">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                            </svg>
+                        </button>
+                        <div id="accessibility-menu" class="hidden absolute right-0 top-full mt-2 w-64 bg-cyber-card border border-cyber-border rounded-xl shadow-xl z-50 p-3">
+                            <h4 class="text-sm font-semibold mb-3">Accessibility</h4>
+                            <div class="space-y-2">
+                                <button onclick="toggleHighContrast()" class="w-full flex items-center justify-between p-2 rounded-lg hover:bg-cyber-darker text-sm">
+                                    <span>High Contrast</span>
+                                    <span id="high-contrast-status" class="text-xs text-gray-500">Off</span>
+                                </button>
+                                <button onclick="toggleReducedMotion()" class="w-full flex items-center justify-between p-2 rounded-lg hover:bg-cyber-darker text-sm">
+                                    <span>Reduced Motion</span>
+                                    <span id="reduced-motion-status" class="text-xs text-gray-500">Off</span>
+                                </button>
+                                <div class="p-2">
+                                    <label class="text-sm block mb-2">Font Size</label>
+                                    <select id="font-size-select" onchange="changeFontSize(this.value)" class="w-full px-3 py-2 bg-cyber-darker border border-cyber-border rounded-lg text-sm">
+                                        <option value="small">Small</option>
+                                        <option value="normal" selected>Normal</option>
+                                        <option value="large">Large</option>
+                                        <option value="xlarge">Extra Large</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fullscreen Toggle -->
+                    <button onclick="toggleFullscreen()" id="fullscreen-btn" class="p-2 rounded-lg bg-cyber-card border border-cyber-border hover:border-cyber-glow/50 transition-colors" aria-label="Toggle fullscreen" title="Fullscreen (F11)">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                        </svg>
+                    </button>
+                    
+                    <!-- Stealth Mode Toggle -->
+                    <button onclick="toggleStealthMode()" id="stealth-btn" class="p-2 rounded-lg bg-cyber-card border border-cyber-border hover:border-cyber-purple/50 transition-colors" aria-label="Toggle stealth mode" title="Stealth Mode">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                        </svg>
+                    </button>
                     
                     <!-- Privacy Mode Toggle -->
                     <button onclick="togglePrivacyMode()" id="privacy-toggle" class="p-2 rounded-lg bg-cyber-card border border-cyber-border hover:border-cyber-purple/50 transition-colors" aria-label="Toggle privacy mode" title="Privacy Mode (Ctrl+P)">
@@ -755,11 +1000,263 @@
                             </svg>
                             Event Log
                         </h2>
-                        <button onclick="clearLogs()" class="text-xs text-gray-500 hover:text-gray-300 transition-colors">Clear All</button>
+                        <div class="flex gap-2">
+                            <button onclick="bookmarkCurrentEvent()" class="text-xs text-cyber-info hover:text-cyber-glow transition-colors" title="Bookmark">🔖</button>
+                            <button onclick="clearLogs()" class="text-xs text-gray-500 hover:text-gray-300 transition-colors">Clear All</button>
+                        </div>
                     </div>
                     
                     <div id="event-log" class="space-y-2 max-h-64 overflow-y-auto pr-2 font-mono text-sm">
                         <div class="text-gray-500 text-center py-8">No events yet. Start tracking to see activity logs.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== ADVANCED ANALYTICS SECTION ===== -->
+        <div class="mt-8">
+            <h2 class="font-display text-2xl font-bold mb-6 flex items-center gap-3">
+                <svg class="w-7 h-7 text-cyber-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                Advanced Analytics
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Heatmap Calendar -->
+                <div class="lg:col-span-2 bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-display text-lg font-semibold flex items-center gap-2">
+                            <svg class="w-5 h-5 text-cyber-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Activity Heatmap Calendar
+                        </h3>
+                        <span class="text-xs text-gray-500">Last 365 days</span>
+                    </div>
+                    <div id="heatmap-calendar" class="heatmap-container mb-4"></div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-xs text-gray-500">
+                            <span>Less</span>
+                            <div class="flex gap-1">
+                                <div class="w-3 h-3 rounded heatmap-level-0"></div>
+                                <div class="w-3 h-3 rounded heatmap-level-1"></div>
+                                <div class="w-3 h-3 rounded heatmap-level-2"></div>
+                                <div class="w-3 h-3 rounded heatmap-level-3"></div>
+                                <div class="w-3 h-3 rounded heatmap-level-4"></div>
+                                <div class="w-3 h-3 rounded heatmap-level-5"></div>
+                            </div>
+                            <span>More</span>
+                        </div>
+                        <span class="text-xs text-gray-400">Total: <span id="total-activity-count" class="text-cyber-glow font-mono">0</span></span>
+                    </div>
+                </div>
+                
+                <!-- Sleep Pattern Detection -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <h3 class="font-display text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyber-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                        Sleep Pattern Analysis
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="p-3 rounded-lg bg-cyber-darker">
+                            <p class="text-xs text-gray-500 mb-1">Estimated Sleep Window</p>
+                            <p class="text-lg font-mono text-cyber-purple" id="sleep-window">--:-- - --:--</p>
+                        </div>
+                        <div class="p-3 rounded-lg bg-cyber-darker">
+                            <p class="text-xs text-gray-500 mb-1">Average Sleep Duration</p>
+                            <p class="text-lg font-mono text-cyber-info" id="avg-sleep-duration">-- hours</p>
+                        </div>
+                        <div class="p-3 rounded-lg bg-cyber-darker">
+                            <p class="text-xs text-gray-500 mb-1">Detected Timezone</p>
+                            <p class="text-lg font-mono text-cyber-warn" id="detected-timezone">Analyzing...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Peak Activity Hours -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <h3 class="font-display text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyber-warn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Peak Activity Hours
+                    </h3>
+                    <div id="peak-hours-chart" class="h-32 flex items-end gap-1 mb-4"></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 rounded-lg bg-cyber-darker text-center">
+                            <p class="text-xs text-gray-500">Most Active</p>
+                            <p class="text-lg font-mono text-cyber-glow" id="most-active-hour">--:00</p>
+                        </div>
+                        <div class="p-3 rounded-lg bg-cyber-darker text-center">
+                            <p class="text-xs text-gray-500">Least Active</p>
+                            <p class="text-lg font-mono text-cyber-danger" id="least-active-hour">--:00</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RTT Distribution Histogram -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <h3 class="font-display text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyber-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        RTT Distribution
+                    </h3>
+                    <div id="rtt-histogram" class="h-32 flex items-end gap-1 mb-4"></div>
+                    <div class="grid grid-cols-4 gap-2 text-center">
+                        <div class="p-2 rounded-lg bg-cyber-darker">
+                            <p class="text-xs text-gray-500">Min</p>
+                            <p class="text-sm font-mono text-cyber-glow" id="rtt-min">--ms</p>
+                        </div>
+                        <div class="p-2 rounded-lg bg-cyber-darker">
+                            <p class="text-xs text-gray-500">Avg</p>
+                            <p class="text-sm font-mono text-cyber-info" id="rtt-avg">--ms</p>
+                        </div>
+                        <div class="p-2 rounded-lg bg-cyber-darker">
+                            <p class="text-xs text-gray-500">Max</p>
+                            <p class="text-sm font-mono text-cyber-danger" id="rtt-max">--ms</p>
+                        </div>
+                        <div class="p-2 rounded-lg bg-cyber-darker">
+                            <p class="text-xs text-gray-500">StdDev</p>
+                            <p class="text-sm font-mono text-cyber-warn" id="rtt-std-dev">±--ms</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Behavioral Analytics -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <h3 class="font-display text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyber-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Behavioral Analytics
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                            <span class="text-sm text-gray-400">Usage Score</span>
+                            <span class="text-lg font-mono text-cyber-glow" id="usage-frequency-score">--/100</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                            <span class="text-sm text-gray-400">Predictive Status</span>
+                            <span class="text-sm font-mono text-cyber-info" id="predictive-status">Calculating...</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                            <span class="text-sm text-gray-400">Avg Session</span>
+                            <span class="text-sm font-mono text-cyber-warn" id="avg-session-duration">--min</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-darker">
+                            <span class="text-sm text-gray-400">Network Type</span>
+                            <span class="text-sm font-mono text-cyber-purple" id="network-fingerprint">WiFi</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== ALERT SYSTEM & SESSION MANAGEMENT ===== -->
+        <div class="mt-8">
+            <h2 class="font-display text-2xl font-bold mb-6 flex items-center gap-3">
+                <svg class="w-7 h-7 text-cyber-warn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                Alerts & Sessions
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Custom Alert Rules -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-display text-lg font-semibold">Alert Rules</h3>
+                        <button onclick="openAlertRuleModal()" class="px-3 py-1.5 text-xs bg-cyber-warn/20 text-cyber-warn border border-cyber-warn/30 rounded-lg hover:bg-cyber-warn/30 transition-colors">+ New</button>
+                    </div>
+                    <div id="alert-rules-list" class="space-y-3 max-h-48 overflow-y-auto">
+                        <div class="alert-rule alert-rule-inactive p-3 rounded-lg bg-cyber-darker">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium">Night Activity</p>
+                                    <p class="text-xs text-gray-500">2:00 AM - 4:00 AM</p>
+                                </div>
+                                <button onclick="toggleAlertRule(0)" class="px-2 py-1 text-xs bg-gray-700 rounded">Off</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Webhook Configuration -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <h3 class="font-display text-lg font-semibold mb-4">Webhooks</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Discord</label>
+                            <input type="url" id="discord-webhook" placeholder="https://discord.com/api/webhooks/..." class="w-full px-3 py-2 text-sm bg-cyber-darker border border-cyber-border rounded-lg focus:border-cyber-purple focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Telegram Token</label>
+                            <input type="text" id="telegram-token" placeholder="Bot Token" class="w-full px-3 py-2 text-sm bg-cyber-darker border border-cyber-border rounded-lg focus:border-cyber-info focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Telegram Chat ID</label>
+                            <input type="text" id="telegram-chat-id" placeholder="Chat ID" class="w-full px-3 py-2 text-sm bg-cyber-darker border border-cyber-border rounded-lg focus:border-cyber-info focus:outline-none">
+                        </div>
+                        <button onclick="saveWebhookSettings()" class="w-full py-2 text-sm bg-cyber-glow/20 text-cyber-glow border border-cyber-glow/30 rounded-lg hover:bg-cyber-glow/30 transition-colors">Save Webhooks</button>
+                    </div>
+                </div>
+                
+                <!-- Session Management -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-display text-lg font-semibold">Sessions</h3>
+                        <button onclick="saveCurrentSession()" class="px-3 py-1.5 text-xs bg-cyber-glow/20 text-cyber-glow border border-cyber-glow/30 rounded-lg hover:bg-cyber-glow/30 transition-colors">Save</button>
+                    </div>
+                    <div id="saved-sessions-list" class="space-y-2 max-h-32 overflow-y-auto mb-4">
+                        <div class="text-gray-500 text-center py-4 text-sm">No saved sessions</div>
+                    </div>
+                    <textarea id="session-notes" placeholder="Session notes..." class="w-full h-20 px-3 py-2 text-sm bg-cyber-darker border border-cyber-border rounded-lg resize-none focus:border-cyber-glow focus:outline-none"></textarea>
+                    <div class="flex gap-2 mt-3">
+                        <button onclick="addSessionTag('important')" class="session-tag tag-important">📌 Important</button>
+                        <button onclick="addSessionTag('sleep')" class="session-tag tag-sleep">😴 Sleep</button>
+                        <button onclick="addSessionTag('travel')" class="session-tag tag-travel">✈️ Travel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== DATA MANAGEMENT & AUDIT ===== -->
+        <div class="mt-8 mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Data Management -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <h3 class="font-display text-lg font-semibold mb-4">Data Management</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-2">Data Retention</label>
+                            <select id="data-retention" class="w-full px-3 py-2 text-sm bg-cyber-darker border border-cyber-border rounded-lg focus:border-cyber-glow focus:outline-none">
+                                <option value="0">Never delete</option>
+                                <option value="7">7 Days</option>
+                                <option value="30" selected>30 Days</option>
+                                <option value="90">90 Days</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="exportAllData()" class="flex-1 py-2 text-xs bg-cyber-info/20 text-cyber-info border border-cyber-info/30 rounded-lg hover:bg-cyber-info/30 transition-colors">Backup</button>
+                            <button onclick="importData()" class="flex-1 py-2 text-xs bg-cyber-purple/20 text-cyber-purple border border-cyber-purple/30 rounded-lg hover:bg-cyber-purple/30 transition-colors">Restore</button>
+                            <button onclick="clearAllData()" class="flex-1 py-2 text-xs bg-cyber-danger/20 text-cyber-danger border border-cyber-danger/30 rounded-lg hover:bg-cyber-danger/30 transition-colors">Clear</button>
+                        </div>
+                        <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="handleImportFile(event)">
+                    </div>
+                </div>
+                
+                <!-- Audit Log -->
+                <div class="bg-cyber-card rounded-2xl border border-cyber-border p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-display text-lg font-semibold">Audit Log</h3>
+                        <button onclick="exportAuditLog()" class="px-3 py-1.5 text-xs bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors">Export</button>
+                    </div>
+                    <div id="audit-log" class="space-y-2 max-h-48 overflow-y-auto font-mono text-xs">
+                        <div class="text-gray-500 text-center py-4">Audit log records all activities</div>
                     </div>
                 </div>
             </div>
@@ -958,7 +1455,45 @@
                 backendUrl: 'http://localhost:3001',
                 notifications: false,
                 soundAlerts: false,
-                screenThreshold: 1000 // RTT threshold for screen on/off detection
+                screenThreshold: 1000,
+                pinLock: false,
+                pin: '',
+                autoLockTimer: 5,
+                auditLogging: true
+            },
+            // Multi-target tracking
+            multiTargets: [],
+            // Alert rules
+            alertRules: [
+                { id: 0, name: 'Night Activity', condition: 'time-window', timeStart: '02:00', timeEnd: '04:00', enabled: false }
+            ],
+            // Webhook settings
+            webhooks: { discord: '', telegramToken: '', telegramChatId: '', custom: '' },
+            // Saved sessions
+            savedSessions: [],
+            // Analytics data
+            analytics: {
+                heatmapData: {},
+                sleepPattern: { start: null, end: null },
+                peakHours: Array(24).fill(0)
+            },
+            // Audit log
+            auditLog: [],
+            // Bookmarked events
+            bookmarkedEvents: [],
+            // Session tags
+            sessionTags: [],
+            // Dashboard profiles
+            dashboardProfiles: [],
+            // UI state
+            ui: {
+                fullscreen: false,
+                stealthMode: false,
+                highContrast: false,
+                reducedMotion: false,
+                fontSize: 'normal',
+                isLocked: false,
+                disclaimerAccepted: false
             }
         };
 
@@ -2356,6 +2891,359 @@
                 e.preventDefault();
                 printReport();
             }
+        });
+        
+        // ===== LEGAL DISCLAIMER =====
+        function acceptDisclaimer() {
+            const checkbox = document.getElementById('consent-checkbox');
+            if (checkbox && checkbox.checked) {
+                state.ui.disclaimerAccepted = true;
+                localStorage.setItem('falcon-tracker-disclaimer-accepted', 'true');
+                document.getElementById('legal-disclaimer-modal').classList.add('hidden');
+                addAuditLog('Disclaimer accepted');
+                showToast('Welcome to Falcon Tracker', 'success');
+            }
+        }
+        
+        function checkDisclaimer() {
+            const accepted = localStorage.getItem('falcon-tracker-disclaimer-accepted');
+            if (accepted === 'true') {
+                state.ui.disclaimerAccepted = true;
+                document.getElementById('legal-disclaimer-modal')?.classList.add('hidden');
+            }
+        }
+        
+        // Enable accept button when checkbox is checked
+        document.getElementById('consent-checkbox')?.addEventListener('change', function() {
+            document.getElementById('accept-disclaimer-btn').disabled = !this.checked;
+        });
+        
+        // ===== PIN LOCK =====
+        function handlePinInput(input) {
+            const index = parseInt(input.dataset.index);
+            if (input.value.length === 1 && index < 3) {
+                const nextInput = document.querySelector('.pin-digit[data-index="' + (index + 1) + '"]');
+                if (nextInput) nextInput.focus();
+            }
+            const allInputs = document.querySelectorAll('.pin-digit');
+            const pin = Array.from(allInputs).map(i => i.value).join('');
+            if (pin.length === 4) verifyPin(pin);
+        }
+        
+        function handlePinKeydown(e, input) {
+            const index = parseInt(input.dataset.index);
+            if (e.key === 'Backspace' && input.value === '' && index > 0) {
+                const prevInput = document.querySelector('.pin-digit[data-index="' + (index - 1) + '"]');
+                if (prevInput) prevInput.focus();
+            }
+        }
+        
+        function verifyPin(enteredPin) {
+            if (enteredPin === state.settings.pin) {
+                state.ui.isLocked = false;
+                const lockScreen = document.getElementById('pin-lock-screen');
+                if (lockScreen) lockScreen.style.display = 'none';
+                document.querySelectorAll('.pin-digit').forEach(i => i.value = '');
+            } else {
+                const pinError = document.getElementById('pin-error');
+                if (pinError) pinError.style.display = 'block';
+                document.querySelectorAll('.pin-digit').forEach(i => i.value = '');
+                document.querySelector('.pin-digit[data-index="0"]')?.focus();
+            }
+        }
+        
+        // ===== ACCESSIBILITY =====
+        function toggleAccessibilityMenu() {
+            document.getElementById('accessibility-menu')?.classList.toggle('hidden');
+        }
+        
+        function toggleHighContrast() {
+            state.ui.highContrast = !state.ui.highContrast;
+            document.getElementById('high-contrast-status').textContent = state.ui.highContrast ? 'On' : 'Off';
+            document.documentElement.classList.toggle('high-contrast', state.ui.highContrast);
+        }
+        
+        function toggleReducedMotion() {
+            state.ui.reducedMotion = !state.ui.reducedMotion;
+            document.getElementById('reduced-motion-status').textContent = state.ui.reducedMotion ? 'On' : 'Off';
+            document.documentElement.classList.toggle('reduced-motion', state.ui.reducedMotion);
+        }
+        
+        function changeFontSize(size) {
+            state.ui.fontSize = size;
+            document.body.classList.remove('font-size-small', 'font-size-normal', 'font-size-large', 'font-size-xlarge');
+            document.body.classList.add('font-size-' + size);
+        }
+        
+        // ===== FULLSCREEN & STEALTH =====
+        function toggleFullscreen() {
+            state.ui.fullscreen = !state.ui.fullscreen;
+            if (state.ui.fullscreen) {
+                if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+                showToast('Fullscreen enabled', 'info');
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+        
+        function toggleStealthMode() {
+            state.ui.stealthMode = !state.ui.stealthMode;
+            document.body.classList.toggle('stealth-mode', state.ui.stealthMode);
+            document.title = state.ui.stealthMode ? 'Document' : 'Falcon Tracker | RTT Analysis Dashboard';
+            if (state.ui.stealthMode) showToast('Stealth mode enabled', 'info');
+        }
+        
+        // ===== ALERT RULES =====
+        function openAlertRuleModal() { showToast('Alert rule creation coming soon', 'info'); }
+        
+        function toggleAlertRule(index) {
+            if (state.alertRules[index]) {
+                state.alertRules[index].enabled = !state.alertRules[index].enabled;
+                updateAlertRulesList();
+            }
+        }
+        
+        function updateAlertRulesList() {
+            const list = document.getElementById('alert-rules-list');
+            if (!list) return;
+            list.innerHTML = state.alertRules.map((r, i) => 
+                '<div class="alert-rule ' + (r.enabled ? 'alert-rule-active' : 'alert-rule-inactive') + ' p-3 rounded-lg bg-cyber-darker">' +
+                '<div class="flex items-center justify-between">' +
+                '<div><p class="text-sm font-medium">' + escapeHtml(r.name) + '</p><p class="text-xs text-gray-500">' + (r.timeStart || '') + ' - ' + (r.timeEnd || '') + '</p></div>' +
+                '<button onclick="toggleAlertRule(' + i + ')" class="px-2 py-1 text-xs ' + (r.enabled ? 'bg-cyber-glow/20 text-cyber-glow' : 'bg-gray-700') + ' rounded">' + (r.enabled ? 'On' : 'Off') + '</button>' +
+                '</div></div>'
+            ).join('');
+        }
+        
+        // ===== WEBHOOKS =====
+        function saveWebhookSettings() {
+            state.webhooks.discord = document.getElementById('discord-webhook')?.value || '';
+            state.webhooks.telegramToken = document.getElementById('telegram-token')?.value || '';
+            state.webhooks.telegramChatId = document.getElementById('telegram-chat-id')?.value || '';
+            localStorage.setItem('falcon-tracker-webhooks', JSON.stringify(state.webhooks));
+            addAuditLog('Webhooks saved');
+            showToast('Webhooks saved', 'success');
+        }
+        
+        // ===== SESSION MANAGEMENT =====
+        function saveCurrentSession() {
+            const name = prompt('Enter session name:');
+            if (!name) return;
+            state.savedSessions.push({
+                id: Date.now(),
+                name: name,
+                rttHistory: [...state.rttHistory],
+                stats: {...state.stats},
+                notes: document.getElementById('session-notes')?.value || '',
+                tags: [...state.sessionTags],
+                savedAt: new Date().toISOString()
+            });
+            localStorage.setItem('falcon-tracker-sessions', JSON.stringify(state.savedSessions));
+            updateSavedSessionsList();
+            addAuditLog('Session saved: ' + name);
+            showToast('Session saved', 'success');
+        }
+        
+        function updateSavedSessionsList() {
+            const list = document.getElementById('saved-sessions-list');
+            if (!list) return;
+            if (state.savedSessions.length === 0) {
+                list.innerHTML = '<div class="text-gray-500 text-center py-4 text-sm">No saved sessions</div>';
+                return;
+            }
+            list.innerHTML = state.savedSessions.map(s => 
+                '<div class="flex items-center justify-between p-2 rounded-lg bg-cyber-darker">' +
+                '<span class="text-sm">' + escapeHtml(s.name) + '</span>' +
+                '<button onclick="loadSession(' + s.id + ')" class="text-xs text-cyber-info">Load</button></div>'
+            ).join('');
+        }
+        
+        function loadSession(id) {
+            const session = state.savedSessions.find(s => s.id === id);
+            if (session) {
+                state.rttHistory = session.rttHistory || [];
+                state.stats = session.stats;
+                if (document.getElementById('session-notes')) document.getElementById('session-notes').value = session.notes || '';
+                updateChart();
+                addAuditLog('Session loaded: ' + session.name);
+                showToast('Session loaded', 'success');
+            }
+        }
+        
+        function addSessionTag(tag) {
+            if (!state.sessionTags.includes(tag)) {
+                state.sessionTags.push(tag);
+                showToast('Tag added: ' + tag, 'info');
+            }
+        }
+        
+        function bookmarkCurrentEvent() {
+            if (state.rttHistory.length === 0) {
+                showToast('No events to bookmark', 'warning');
+                return;
+            }
+            state.bookmarkedEvents.push({...state.rttHistory[state.rttHistory.length - 1], bookmarkedAt: new Date().toISOString()});
+            addAuditLog('Event bookmarked');
+            showToast('Event bookmarked', 'success');
+        }
+        
+        // ===== DATA MANAGEMENT =====
+        function exportAllData() {
+            const data = {
+                rttHistory: state.rttHistory,
+                sessions: state.savedSessions,
+                settings: state.settings,
+                auditLog: state.auditLog,
+                exportDate: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'falcon-tracker-backup-' + new Date().toISOString().slice(0,10) + '.json';
+            link.click();
+            URL.revokeObjectURL(link.href);
+            addAuditLog('Data exported');
+            showToast('Backup exported', 'success');
+        }
+        
+        function importData() { document.getElementById('import-file-input')?.click(); }
+        
+        function handleImportFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.rttHistory) state.rttHistory = data.rttHistory;
+                    if (data.sessions) state.savedSessions = data.sessions;
+                    if (data.settings) state.settings = {...state.settings, ...data.settings};
+                    updateChart();
+                    updateSavedSessionsList();
+                    addAuditLog('Data imported');
+                    showToast('Data restored', 'success');
+                } catch (err) {
+                    showToast('Invalid backup file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function clearAllData() {
+            if (!confirm('Clear all data? This cannot be undone.')) return;
+            state.rttHistory = [];
+            state.stats = {online: 0, standby: 0, offline: 0, total: 0};
+            state.savedSessions = [];
+            state.auditLog = [];
+            localStorage.clear();
+            updateChart();
+            updateSavedSessionsList();
+            showToast('Data cleared', 'info');
+        }
+        
+        // ===== AUDIT LOG =====
+        function addAuditLog(action) {
+            if (!state.settings.auditLogging) return;
+            state.auditLog.push({timestamp: new Date().toISOString(), action: action});
+            updateAuditLogDisplay();
+            if (state.auditLog.length > 500) state.auditLog = state.auditLog.slice(-500);
+        }
+        
+        function updateAuditLogDisplay() {
+            const container = document.getElementById('audit-log');
+            if (!container || state.auditLog.length === 0) return;
+            container.innerHTML = state.auditLog.slice(-20).reverse().map(e => 
+                '<div class="p-2 text-gray-400">' + new Date(e.timestamp).toLocaleTimeString() + ' - ' + escapeHtml(e.action) + '</div>'
+            ).join('');
+        }
+        
+        function exportAuditLog() {
+            const csv = 'Timestamp,Action\n' + state.auditLog.map(e => e.timestamp + ',"' + e.action.replace(/"/g, '""') + '"').join('\n');
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'audit-log-' + new Date().toISOString().slice(0,10) + '.csv';
+            link.click();
+            showToast('Audit log exported', 'success');
+        }
+        
+        // ===== ANALYTICS INITIALIZATION =====
+        function initHeatmapCalendar() {
+            const container = document.getElementById('heatmap-calendar');
+            if (!container) return;
+            container.innerHTML = '';
+            for (let i = 0; i < 365; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'heatmap-cell heatmap-level-0';
+                const date = new Date();
+                date.setDate(date.getDate() - (364 - i));
+                cell.title = date.toLocaleDateString();
+                container.appendChild(cell);
+            }
+        }
+        
+        function initPeakHoursChart() {
+            const container = document.getElementById('peak-hours-chart');
+            if (!container) return;
+            container.innerHTML = '';
+            for (let i = 0; i < 24; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'flex-1 rounded-t bg-gray-700/50 transition-all';
+                bar.style.height = '10%';
+                bar.title = i.toString().padStart(2, '0') + ':00';
+                container.appendChild(bar);
+            }
+        }
+        
+        function initRttHistogram() {
+            const container = document.getElementById('rtt-histogram');
+            if (!container) return;
+            container.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'histogram-bar flex-1 rounded-t bg-cyber-info/50';
+                bar.style.height = '10%';
+                bar.title = (i * 500) + '-' + ((i + 1) * 500) + 'ms';
+                container.appendChild(bar);
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // ===== EXTENDED INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            checkDisclaimer();
+            initHeatmapCalendar();
+            initPeakHoursChart();
+            initRttHistogram();
+            
+            // Load saved data
+            const savedSessions = localStorage.getItem('falcon-tracker-sessions');
+            if (savedSessions) state.savedSessions = JSON.parse(savedSessions);
+            
+            const savedWebhooks = localStorage.getItem('falcon-tracker-webhooks');
+            if (savedWebhooks) {
+                state.webhooks = JSON.parse(savedWebhooks);
+                if (document.getElementById('discord-webhook')) document.getElementById('discord-webhook').value = state.webhooks.discord || '';
+                if (document.getElementById('telegram-token')) document.getElementById('telegram-token').value = state.webhooks.telegramToken || '';
+                if (document.getElementById('telegram-chat-id')) document.getElementById('telegram-chat-id').value = state.webhooks.telegramChatId || '';
+            }
+            
+            updateSavedSessionsList();
+            updateAlertRulesList();
+            
+            // Close accessibility menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#accessibility-btn') && !e.target.closest('#accessibility-menu')) {
+                    document.getElementById('accessibility-menu')?.classList.add('hidden');
+                }
+            });
+            
+            addAuditLog('Dashboard initialized');
         });
     </script>
 </body>
