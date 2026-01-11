@@ -3224,15 +3224,19 @@
         }
         
         function updatePeakActivityHours() {
+            // Activity weights for scoring (online activities count more than standby)
+            const ONLINE_WEIGHT = 2;
+            const STANDBY_WEIGHT = 1;
+            
             // Count activity per hour
             const hourlyActivity = Array(24).fill(0);
             
             state.rttHistory.forEach(entry => {
                 const hour = new Date(entry.timestamp).getHours();
                 if (entry.status === 'online') {
-                    hourlyActivity[hour] += 2;
+                    hourlyActivity[hour] += ONLINE_WEIGHT;
                 } else if (entry.status === 'standby') {
-                    hourlyActivity[hour] += 1;
+                    hourlyActivity[hour] += STANDBY_WEIGHT;
                 }
             });
             
@@ -3264,12 +3268,17 @@
         }
         
         function updateRttDistribution() {
-            // Create RTT histogram buckets (10 buckets, 500ms each)
-            const buckets = Array(10).fill(0);
+            // Histogram configuration
+            const BUCKET_COUNT = 10;
+            const BUCKET_SIZE_MS = 500;
+            const MAX_BUCKET_INDEX = BUCKET_COUNT - 1;
+            
+            // Create RTT histogram buckets
+            const buckets = Array(BUCKET_COUNT).fill(0);
             const rtts = state.rttHistory.map(h => h.rtt);
             
             rtts.forEach(rtt => {
-                const bucketIndex = Math.min(Math.floor(rtt / 500), 9);
+                const bucketIndex = Math.min(Math.floor(rtt / BUCKET_SIZE_MS), MAX_BUCKET_INDEX);
                 buckets[bucketIndex]++;
             });
             
@@ -3310,14 +3319,19 @@
             document.getElementById('usage-frequency-score').textContent = `${usageScore}/100`;
             
             // Predictive status based on recent history
-            const recentHistory = state.rttHistory.slice(-10);
+            // Thresholds are relative to history size for consistency
+            const RECENT_HISTORY_SIZE = 10;
+            const MIN_HISTORY_FOR_PREDICTION = 5;
+            const recentHistory = state.rttHistory.slice(-RECENT_HISTORY_SIZE);
             const recentOnline = recentHistory.filter(h => h.status === 'online').length;
             let predictiveStatus = 'Unknown';
             
-            if (recentHistory.length >= 5) {
-                if (recentOnline >= 7) {
+            if (recentHistory.length >= MIN_HISTORY_FOR_PREDICTION) {
+                // Calculate online percentage relative to actual history size
+                const onlinePercentage = recentOnline / recentHistory.length;
+                if (onlinePercentage >= 0.7) {
                     predictiveStatus = 'Likely Online';
-                } else if (recentOnline >= 4) {
+                } else if (onlinePercentage >= 0.4) {
                     predictiveStatus = 'Intermittent';
                 } else {
                     predictiveStatus = 'Likely Offline';
