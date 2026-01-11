@@ -403,10 +403,10 @@
             transition: stroke-dashoffset 1s ease;
         }
         
-        /* Stealth Mode */
+        /* Stealth Mode - uses opacity instead of visibility for better accessibility */
         .stealth-mode { background: #000 !important; }
-        .stealth-mode * { visibility: hidden; }
-        .stealth-mode:hover * { visibility: visible; }
+        .stealth-mode main, .stealth-mode header, .stealth-mode footer { opacity: 0.05; transition: opacity 0.3s; }
+        .stealth-mode:hover main, .stealth-mode:hover header, .stealth-mode:hover footer { opacity: 1; }
         
         /* Font Size Controls */
         .font-size-small { font-size: 12px; }
@@ -3172,11 +3172,11 @@
             const container = document.getElementById('heatmap-calendar');
             if (!container) return;
             container.innerHTML = '';
-            for (let i = 0; i < 371; i++) {
+            for (let i = 0; i < 365; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'heatmap-cell heatmap-level-0';
                 const date = new Date();
-                date.setDate(date.getDate() - (370 - i));
+                date.setDate(date.getDate() - (364 - i));
                 cell.title = date.toLocaleDateString();
                 container.appendChild(cell);
             }
