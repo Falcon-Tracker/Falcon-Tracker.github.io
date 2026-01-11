@@ -533,7 +533,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-3 h-3 rounded bg-cyber-warn" aria-hidden="true"></div>
-                            <span class="text-xs text-gray-400">Standby (threshold-3x)</span>
+                            <span class="text-xs text-gray-400">Standby (1x-3x threshold)</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-3 h-3 rounded bg-cyber-danger" aria-hidden="true"></div>
@@ -738,6 +738,20 @@
 
         let rttChart = null;
         let trackingInterval = null;
+
+        // ===== HELPER FUNCTIONS =====
+        /**
+         * Calculate the median of a sorted array of numbers
+         * @param {number[]} sortedArr - Pre-sorted array of numbers
+         * @returns {number} The median value
+         */
+        function calculateMedian(sortedArr) {
+            if (sortedArr.length === 0) return 0;
+            const mid = Math.floor(sortedArr.length / 2);
+            return sortedArr.length % 2 === 0
+                ? Math.round((sortedArr[mid - 1] + sortedArr[mid]) / 2)
+                : sortedArr[mid];
+        }
 
         // ===== INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', () => {
@@ -1183,13 +1197,7 @@
                 : 0;
             
             const sortedRtts = [...state.rttHistory.map(h => h.rtt)].sort((a, b) => a - b);
-            let median = 0;
-            if (sortedRtts.length > 0) {
-                const mid = Math.floor(sortedRtts.length / 2);
-                median = sortedRtts.length % 2 === 0
-                    ? Math.round((sortedRtts[mid - 1] + sortedRtts[mid]) / 2)
-                    : sortedRtts[mid];
-            }
+            const median = calculateMedian(sortedRtts);
             const threshold = state.settings.screenThreshold;
             
             // Update statistics
@@ -1240,13 +1248,14 @@
                 ? recentHistory.reduce((sum, h) => sum + h.rtt, 0) / recentHistory.length
                 : rtt;
             
-            // Calculate RTT variance for confidence scoring
-            const variance = recentHistory.length > 1
+            // Calculate RTT standard deviation for confidence scoring
+            // Using population standard deviation (divide by n) since we're using the full available sample
+            const stdDev = recentHistory.length > 1
                 ? Math.sqrt(recentHistory.reduce((sum, h) => sum + Math.pow(h.rtt - avgRecentRtt, 2), 0) / recentHistory.length)
                 : 0;
             
-            // Lower variance = higher confidence (more consistent = easier to fingerprint)
-            const baseConfidence = Math.max(50, Math.min(95, 95 - (variance / 10)));
+            // Lower standard deviation = higher confidence (more consistent = easier to fingerprint)
+            const baseConfidence = Math.max(50, Math.min(95, 95 - (stdDev / 10)));
             
             let detectedOS = { icon: '❓', name: 'Unknown', confidence: 0 };
             
@@ -1267,8 +1276,8 @@
                 };
             } else if (normalizedRtt < 1.0) {
                 // Near-threshold responses - could be desktop/web clients
-                // Use average RTT variance to distinguish
-                if (variance < 100) {
+                // Use RTT standard deviation to distinguish
+                if (stdDev < 100) {
                     detectedOS = { 
                         icon: '💻', 
                         name: 'Desktop', 
